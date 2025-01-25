@@ -20,6 +20,9 @@ func (ctx *AuthCache) Create(account domain.Account) error {
 	if _, exists := ctx.accounts[account.Name]; exists {
 		return domain.ErrAccountAlreadyExists
 	}
+	if account.Name == "" {
+		return domain.ErrEmptyName
+	}
 	account.Token = ctx.tokenGenerator.Generate()
 	ctx.accounts[account.Name] = account
 	return nil

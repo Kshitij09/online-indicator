@@ -9,6 +9,7 @@ type Account struct {
 
 var ErrAccountAlreadyExists = errors.New("account already exists")
 var ErrAccountNotFound = errors.New("account not found")
+var ErrEmptyName = errors.New("account name cannot be empty")
 
 type RegisterDao interface {
 	Create(Account) error

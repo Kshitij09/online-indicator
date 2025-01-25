@@ -23,6 +23,16 @@ func TestAuthCache_Create(t *testing.T) {
 	}
 }
 
+func TestAuthCache_Create_EmptyName(t *testing.T) {
+	tokenGen := StaticTokenGenerator{StubToken: "1"}
+	cache := NewRegisterDao(tokenGen)
+	acc := domain.Account{Name: ""}
+	err := cache.Create(acc)
+	if !errors.Is(err, domain.ErrEmptyName) {
+		t.Errorf("expected %s, got %s", domain.ErrEmptyName, err)
+	}
+}
+
 func TestAuthCache_CreateExisting(t *testing.T) {
 	tokenGen := StaticTokenGenerator{StubToken: "1"}
 	cache := NewRegisterDao(tokenGen)
