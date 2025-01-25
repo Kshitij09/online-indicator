@@ -8,7 +8,7 @@ import (
 
 func TestAuthCache_Create(t *testing.T) {
 	tokenGen := StaticTokenGenerator{StubToken: "1"}
-	cache := NewAuthCache(tokenGen)
+	cache := NewRegisterDao(tokenGen)
 	acc := domain.Account{Name: "John Doe"}
 	err := cache.Create(acc)
 	if err != nil {
@@ -25,7 +25,7 @@ func TestAuthCache_Create(t *testing.T) {
 
 func TestAuthCache_CreateExisting(t *testing.T) {
 	tokenGen := StaticTokenGenerator{StubToken: "1"}
-	cache := NewAuthCache(tokenGen)
+	cache := NewRegisterDao(tokenGen)
 	acc := domain.Account{Name: "John Doe"}
 	err := cache.Create(acc)
 	if err != nil {
@@ -39,7 +39,7 @@ func TestAuthCache_CreateExisting(t *testing.T) {
 
 func TestAuthCache_Get(t *testing.T) {
 	tokenGen := StaticTokenGenerator{StubToken: "1"}
-	cache := NewAuthCache(tokenGen)
+	cache := NewRegisterDao(tokenGen)
 	acc := domain.Account{Name: "John Doe"}
 	_, exists := cache.Get(acc.Name)
 	if exists {
