@@ -3,7 +3,8 @@ package domain
 import "errors"
 
 type Account struct {
-	Name string
+	Name  string
+	Token string
 }
 
 var ErrAccountAlreadyExists = errors.New("account already exists")

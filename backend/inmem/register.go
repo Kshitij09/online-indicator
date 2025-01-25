@@ -5,12 +5,14 @@ import (
 )
 
 type AuthCache struct {
-	accounts map[string]domain.Account
+	accounts       map[string]domain.Account
+	tokenGenerator domain.TokenGenerator
 }
 
-func NewAuthCache() *AuthCache {
+func NewAuthCache(tokenGenerator domain.TokenGenerator) *AuthCache {
 	return &AuthCache{
-		accounts: make(map[string]domain.Account),
+		accounts:       make(map[string]domain.Account),
+		tokenGenerator: tokenGenerator,
 	}
 }
 
@@ -18,6 +20,7 @@ func (ctx *AuthCache) Create(account domain.Account) error {
 	if _, exists := ctx.accounts[account.Name]; exists {
 		return domain.ErrAccountAlreadyExists
 	}
+	account.Token = ctx.tokenGenerator.Generate()
 	ctx.accounts[account.Name] = account
 	return nil
 }

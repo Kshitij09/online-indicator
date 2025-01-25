@@ -7,16 +7,25 @@ import (
 )
 
 func TestAuthCache_Create(t *testing.T) {
-	cache := NewAuthCache()
+	tokenGen := StaticTokenGenerator{StubToken: "1"}
+	cache := NewAuthCache(tokenGen)
 	acc := domain.Account{Name: "John Doe"}
 	err := cache.Create(acc)
 	if err != nil {
 		t.Error(err)
 	}
+	created, exists := cache.Get(acc.Name)
+	if !exists {
+		t.Errorf("account was not created")
+	}
+	if created.Token != tokenGen.StubToken {
+		t.Errorf("token was not created")
+	}
 }
 
 func TestAuthCache_CreateExisting(t *testing.T) {
-	cache := NewAuthCache()
+	tokenGen := StaticTokenGenerator{StubToken: "1"}
+	cache := NewAuthCache(tokenGen)
 	acc := domain.Account{Name: "John Doe"}
 	err := cache.Create(acc)
 	if err != nil {
@@ -29,7 +38,8 @@ func TestAuthCache_CreateExisting(t *testing.T) {
 }
 
 func TestAuthCache_Get(t *testing.T) {
-	cache := NewAuthCache()
+	tokenGen := StaticTokenGenerator{StubToken: "1"}
+	cache := NewAuthCache(tokenGen)
 	acc := domain.Account{Name: "John Doe"}
 	_, exists := cache.Get(acc.Name)
 	if exists {
@@ -43,4 +53,12 @@ func TestAuthCache_Get(t *testing.T) {
 	if !exists {
 		t.Error("expected exists=true after creation, got false")
 	}
+}
+
+type StaticTokenGenerator struct {
+	StubToken string
+}
+
+func (ctx StaticTokenGenerator) Generate() string {
+	return ctx.StubToken
 }
