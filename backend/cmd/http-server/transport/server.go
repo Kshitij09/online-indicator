@@ -24,6 +24,8 @@ func (s *Server) Run(port int) error {
 	router.HandleFunc("GET /health", NewHttpHandler(health, logger))
 	register := RegisterHandler(s.Storage)
 	router.HandleFunc("POST /register", NewHttpHandler(register, logger))
+	login := LoginHandler(s.Storage)
+	router.HandleFunc("POST /login", NewHttpHandler(login, logger))
 	server := &http.Server{
 		Addr:    listAddr,
 		Handler: router,
