@@ -34,8 +34,9 @@ func (ctx *AuthCache) Get(name string) (domain.Account, bool) {
 	}
 }
 
-func (ctx *AuthCache) Delete(name string) {
+func (ctx *AuthCache) Delete(name string) error {
 	delete(ctx.accounts, name)
+	return nil
 }
 
 func (ctx *AuthCache) Update(account domain.Account) error {
