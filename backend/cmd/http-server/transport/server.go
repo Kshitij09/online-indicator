@@ -2,6 +2,8 @@ package transport
 
 import (
 	"fmt"
+	"github.com/Kshitij09/online-indicator/cmd/http-server/transport/handlers"
+	"github.com/Kshitij09/online-indicator/cmd/http-server/transport/middlewares"
 	"log"
 	"net/http"
 )
@@ -14,7 +16,8 @@ func NewServer() *Server {
 func (s *Server) Run(port int) error {
 	listAddr := fmt.Sprintf(":%d", port)
 	router := http.NewServeMux()
-	router.HandleFunc("GET /health", health)
+	baseMiddleware := middlewares.HttpLogger
+	router.HandleFunc("GET /health", handlers.NewHttpHandler(baseMiddleware(health)))
 	server := &http.Server{
 		Addr:    listAddr,
 		Handler: router,
@@ -23,6 +26,7 @@ func (s *Server) Run(port int) error {
 	return server.ListenAndServe()
 }
 
-func health(w http.ResponseWriter, _ *http.Request) {
-	w.Write([]byte("OK"))
+func health(w http.ResponseWriter, _ *http.Request) error {
+	_, err := w.Write([]byte("OK"))
+	return err
 }
