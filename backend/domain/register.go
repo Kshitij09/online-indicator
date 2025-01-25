@@ -10,7 +10,7 @@ type Account struct {
 var ErrAccountAlreadyExists = errors.New("account already exists")
 var ErrAccountNotFound = errors.New("account not found")
 
-type Dao interface {
+type RegisterDao interface {
 	Create(Account) error
 	Get(name string) (Account, bool)
 	Update(Account) error
