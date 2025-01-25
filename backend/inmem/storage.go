@@ -3,15 +3,15 @@ package inmem
 import "github.com/Kshitij09/online-indicator/domain"
 
 type Storage struct {
-	Auth domain.RegisterDao
+	auth domain.AuthDao
 }
 
 func NewStorage(tokenGen domain.TokenGenerator) *Storage {
 	return &Storage{
-		Auth: NewRegisterDao(tokenGen),
+		auth: NewAuthDao(tokenGen),
 	}
 }
 
-func (ctx Storage) Register() domain.RegisterDao {
-	return ctx.Auth
+func (ctx Storage) Auth() domain.AuthDao {
+	return ctx.auth
 }

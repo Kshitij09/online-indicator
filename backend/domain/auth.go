@@ -13,7 +13,7 @@ var ErrAccountAlreadyExists = errors.New("account already exists")
 var ErrAccountNotFound = errors.New("account not found")
 var ErrEmptyName = errors.New("account name cannot be empty")
 
-type RegisterDao interface {
+type AuthDao interface {
 	Create(Account) (Account, error)
 	Get(name string) (Account, bool)
 	Update(Account) error

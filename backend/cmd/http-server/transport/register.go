@@ -30,7 +30,7 @@ func RegisterHandler(storage domain.Storage) handlers.Handler {
 		}
 
 		acc := domain.Account{Name: req.Name}
-		created, err := storage.Register().Create(acc)
+		created, err := storage.Auth().Create(acc)
 		if errors.Is(err, domain.ErrAccountAlreadyExists) {
 			return apierror.SimpleAPIError(http.StatusConflict, "account already exists")
 		}

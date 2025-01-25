@@ -50,7 +50,7 @@ func TestRegisterHandler_AccountExists(t *testing.T) {
 	handler := NewHttpHandler(register)
 
 	existing := domain.Account{Name: "test"}
-	_, err = storage.Register().Create(existing)
+	_, err = storage.Auth().Create(existing)
 	if err != nil {
 		t.Error(err)
 	}

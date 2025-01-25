@@ -9,7 +9,7 @@ type AuthCache struct {
 	tokenGenerator domain.TokenGenerator
 }
 
-func NewRegisterDao(tokenGenerator domain.TokenGenerator) domain.RegisterDao {
+func NewAuthDao(tokenGenerator domain.TokenGenerator) domain.AuthDao {
 	return &AuthCache{
 		accounts:       make(map[string]domain.Account),
 		tokenGenerator: tokenGenerator,
