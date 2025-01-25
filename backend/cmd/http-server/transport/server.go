@@ -16,8 +16,8 @@ func NewServer() *Server {
 func (s *Server) Run(port int) error {
 	listAddr := fmt.Sprintf(":%d", port)
 	router := http.NewServeMux()
-	baseMiddleware := middlewares.HttpLogger
-	router.HandleFunc("GET /health", handlers.NewHttpHandler(baseMiddleware(health)))
+	logger := middlewares.HttpLogger
+	router.HandleFunc("GET /health", handlers.NewHttpHandler(health, logger))
 	server := &http.Server{
 		Addr:    listAddr,
 		Handler: router,
