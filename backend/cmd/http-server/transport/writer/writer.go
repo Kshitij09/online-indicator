@@ -2,7 +2,7 @@ package writer
 
 import (
 	"encoding/json"
-	"github.com/Kshitij09/snakechat_server/transport/apierror"
+	"github.com/Kshitij09/online-indicator/cmd/http-server/transport/apierror"
 	"net/http"
 )
 
