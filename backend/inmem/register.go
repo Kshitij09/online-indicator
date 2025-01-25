@@ -16,16 +16,16 @@ func NewRegisterDao(tokenGenerator domain.TokenGenerator) domain.RegisterDao {
 	}
 }
 
-func (ctx *AuthCache) Create(account domain.Account) error {
+func (ctx *AuthCache) Create(account domain.Account) (domain.Account, error) {
 	if _, exists := ctx.accounts[account.Name]; exists {
-		return domain.ErrAccountAlreadyExists
+		return domain.EmptyAccount, domain.ErrAccountAlreadyExists
 	}
 	if account.Name == "" {
-		return domain.ErrEmptyName
+		return domain.EmptyAccount, domain.ErrEmptyName
 	}
 	account.Token = ctx.tokenGenerator.Generate()
 	ctx.accounts[account.Name] = account
-	return nil
+	return account, nil
 }
 
 func (ctx *AuthCache) Get(name string) (domain.Account, bool) {

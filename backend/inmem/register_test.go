@@ -10,12 +10,11 @@ func TestAuthCache_Create(t *testing.T) {
 	tokenGen := StaticTokenGenerator{StubToken: "1"}
 	cache := NewRegisterDao(tokenGen)
 	acc := domain.Account{Name: "John Doe"}
-	err := cache.Create(acc)
+	created, err := cache.Create(acc)
 	if err != nil {
 		t.Error(err)
 	}
-	created, exists := cache.Get(acc.Name)
-	if !exists {
+	if created == domain.EmptyAccount {
 		t.Errorf("account was not created")
 	}
 	if created.Token != tokenGen.StubToken {
@@ -27,7 +26,7 @@ func TestAuthCache_Create_EmptyName(t *testing.T) {
 	tokenGen := StaticTokenGenerator{StubToken: "1"}
 	cache := NewRegisterDao(tokenGen)
 	acc := domain.Account{Name: ""}
-	err := cache.Create(acc)
+	_, err := cache.Create(acc)
 	if !errors.Is(err, domain.ErrEmptyName) {
 		t.Errorf("expected %s, got %s", domain.ErrEmptyName, err)
 	}
@@ -37,11 +36,11 @@ func TestAuthCache_CreateExisting(t *testing.T) {
 	tokenGen := StaticTokenGenerator{StubToken: "1"}
 	cache := NewRegisterDao(tokenGen)
 	acc := domain.Account{Name: "John Doe"}
-	err := cache.Create(acc)
+	_, err := cache.Create(acc)
 	if err != nil {
 		t.Error(err)
 	}
-	err = cache.Create(acc)
+	_, err = cache.Create(acc)
 	if !errors.Is(err, domain.ErrAccountAlreadyExists) {
 		t.Errorf("expected %s, got %s", domain.ErrAccountAlreadyExists, err)
 	}
@@ -55,13 +54,16 @@ func TestAuthCache_Get(t *testing.T) {
 	if exists {
 		t.Error("expected exists=false initially, got true")
 	}
-	err := cache.Create(acc)
+	created, err := cache.Create(acc)
 	if err != nil {
 		t.Error(err)
 	}
-	_, exists = cache.Get(acc.Name)
+	fetched, exists := cache.Get(acc.Name)
 	if !exists {
 		t.Error("expected exists=true after creation, got false")
+	}
+	if fetched != created {
+		t.Errorf("expected %s, got %s", acc, fetched)
 	}
 }
 
