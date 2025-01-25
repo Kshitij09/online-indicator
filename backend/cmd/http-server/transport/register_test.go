@@ -14,7 +14,7 @@ import (
 
 func TestRegisterHandler_Success(t *testing.T) {
 	body := RegisterRequest{Name: "test"}
-	req, err := createRequest(body)
+	req, err := createRegisterRequest(body)
 	if err != nil {
 		t.Error(err)
 	}
@@ -39,7 +39,7 @@ func TestRegisterHandler_Success(t *testing.T) {
 
 func TestRegisterHandler_AccountExists(t *testing.T) {
 	body := RegisterRequest{Name: "test"}
-	req, err := createRequest(body)
+	req, err := createRegisterRequest(body)
 	if err != nil {
 		t.Error(err)
 	}
@@ -77,7 +77,7 @@ func TestRegisterHandler_AccountExists(t *testing.T) {
 
 func TestRegisterHandler_NameRequired(t *testing.T) {
 	body := RegisterRequest{}
-	req, err := createRequest(body)
+	req, err := createRegisterRequest(body)
 	if err != nil {
 		t.Error(err)
 	}
@@ -107,7 +107,7 @@ func TestRegisterHandler_NameRequired(t *testing.T) {
 	}
 }
 
-func createRequest(req RegisterRequest) (*http.Request, error) {
+func createRegisterRequest(req RegisterRequest) (*http.Request, error) {
 	serialized, err := json.Marshal(req)
 	if err != nil {
 		return nil, nil
