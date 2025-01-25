@@ -2,7 +2,7 @@ package main
 
 import (
 	"flag"
-	"online-indicator/cmd/http-server/transport"
+	"github.com/Kshitij09/online-indicator/cmd/http-server/transport"
 )
 
 func main() {
