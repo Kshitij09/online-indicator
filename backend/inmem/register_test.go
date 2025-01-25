@@ -1,0 +1,46 @@
+package inmem
+
+import (
+	"errors"
+	"github.com/Kshitij09/online-indicator/domain"
+	"testing"
+)
+
+func TestAuthCache_Create(t *testing.T) {
+	cache := NewAuthCache()
+	acc := domain.Account{Name: "John Doe"}
+	err := cache.Create(acc)
+	if err != nil {
+		t.Error(err)
+	}
+}
+
+func TestAuthCache_CreateExisting(t *testing.T) {
+	cache := NewAuthCache()
+	acc := domain.Account{Name: "John Doe"}
+	err := cache.Create(acc)
+	if err != nil {
+		t.Error(err)
+	}
+	err = cache.Create(acc)
+	if !errors.Is(err, domain.ErrAccountAlreadyExists) {
+		t.Errorf("expected %s, got %s", domain.ErrAccountAlreadyExists, err)
+	}
+}
+
+func TestAuthCache_Get(t *testing.T) {
+	cache := NewAuthCache()
+	acc := domain.Account{Name: "John Doe"}
+	_, exists := cache.Get(acc.Name)
+	if exists {
+		t.Error("expected exists=false initially, got true")
+	}
+	err := cache.Create(acc)
+	if err != nil {
+		t.Error(err)
+	}
+	_, exists = cache.Get(acc.Name)
+	if !exists {
+		t.Error("expected exists=true after creation, got false")
+	}
+}
