@@ -14,13 +14,13 @@ import (
 )
 
 func TestLoginHandler_Success(t *testing.T) {
-	body := LoginRequest{Name: "test"}
+	body := LoginRequest{Name: "test", Token: "123"}
 	req, err := createLoginRequest(body)
 	if err != nil {
 		t.Error(err)
 	}
 	recorder := httptest.NewRecorder()
-	tokenGen := stubs.StaticTokenGenerator{StubToken: "1"}
+	tokenGen := stubs.StaticTokenGenerator{StubToken: body.Token}
 	fakeClock := clockwork.NewFakeClock()
 	storage := inmem.NewStorage(tokenGen, fakeClock)
 	handler := NewHttpHandler(LoginHandler(storage))
@@ -44,6 +44,33 @@ func TestLoginHandler_Success(t *testing.T) {
 	}
 	if resp.Token != tokenGen.StubToken {
 		t.Errorf("token incorrect, expected %s, got %s", tokenGen.StubToken, resp.Token)
+	}
+}
+
+func TestLoginHandler_InvalidCredentials(t *testing.T) {
+	body := LoginRequest{Name: "test", Token: "123"}
+	req, err := createLoginRequest(body)
+	if err != nil {
+		t.Error(err)
+	}
+	recorder := httptest.NewRecorder()
+	tokenGen := stubs.StaticTokenGenerator{StubToken: "random"}
+	fakeClock := clockwork.NewFakeClock()
+	storage := inmem.NewStorage(tokenGen, fakeClock)
+	handler := NewHttpHandler(LoginHandler(storage))
+
+	existing := domain.Account{Name: body.Name}
+	_, err = storage.Auth().Create(existing)
+	if err != nil {
+		t.Error(err)
+	}
+
+	handler(recorder, req)
+
+	result := recorder.Result()
+	expectedStatusCode := http.StatusUnauthorized
+	if result.StatusCode != expectedStatusCode {
+		t.Errorf("request failed: expected %d, got %d", expectedStatusCode, result.StatusCode)
 	}
 }
 
