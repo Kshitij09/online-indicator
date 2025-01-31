@@ -31,7 +31,7 @@ func (ctx *StatusService) Ping(sessionId string) error {
 	if !exists {
 		return domain.ErrSessionNotFound
 	}
-	ctx.status.UpdateOnline(session.Id, true)
+	ctx.status.UpdateOnline(session.AccountId, true)
 	return nil
 }
 
@@ -44,7 +44,7 @@ func (ctx *StatusService) Status(accountId string) (domain.ProfileStatus, error)
 	if !exists {
 		return domain.EmptyProfileStatus, domain.ErrSessionNotFound
 	}
-	status, err := ctx.status.Get(session.Id)
+	status, err := ctx.status.Get(session.AccountId)
 	if err != nil {
 		return domain.EmptyProfileStatus, err
 	}
