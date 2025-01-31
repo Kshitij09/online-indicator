@@ -15,12 +15,13 @@ type StatusDao interface {
 }
 
 type StatusService struct {
-	status  StatusDao
-	session SessionDao
+	status          StatusDao
+	session         SessionDao
+	onlineThreshold time.Duration
 }
 
-func NewStatusService(status StatusDao, session SessionDao) StatusService {
-	return StatusService{status: status, session: session}
+func NewStatusService(status StatusDao, session SessionDao, onlineThreshold time.Duration) StatusService {
+	return StatusService{status: status, session: session, onlineThreshold: onlineThreshold}
 }
 
 func (ctx *StatusService) Ping(sessionId string) error {

@@ -14,8 +14,8 @@ type PingRequest struct {
 	SessionId string `json:"sessionId"`
 }
 
-func PingHandler(storage domain.Storage) handlers.Handler {
-	service := domain.NewStatusService(storage.Status(), storage.Session())
+func PingHandler(storage domain.Storage, config domain.Config) handlers.Handler {
+	service := domain.NewStatusService(storage.Status(), storage.Session(), config.OnlineThreshold)
 	return func(w http.ResponseWriter, r *http.Request) error {
 		var req PingRequest
 		decodeErr := json.NewDecoder(r.Body).Decode(&req)
