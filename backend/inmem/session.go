@@ -26,16 +26,17 @@ func (ctx *SessionCache) Create(accountId string) domain.Session {
 	defer ctx.mu.Unlock()
 	session := domain.Session{
 		Id:        ctx.generator.Generate(),
+		AccountId: accountId,
 		CreatedAt: ctx.clock.Now(),
 	}
-	ctx.sessions[accountId] = session
+	ctx.sessions[session.Id] = session
 	return session
 }
 
-func (ctx *SessionCache) Get(accountId string) (domain.Session, bool) {
+func (ctx *SessionCache) Get(sessionId string) (domain.Session, bool) {
 	ctx.mu.RLock()
 	defer ctx.mu.RUnlock()
-	session, exists := ctx.sessions[accountId]
+	session, exists := ctx.sessions[sessionId]
 	if exists {
 		return session, true
 	} else {
