@@ -7,17 +7,17 @@ import (
 )
 
 type SessionCache struct {
-	mu        sync.RWMutex
-	sessions  map[string]domain.Session
-	generator domain.SessionGenerator
-	clock     clockwork.Clock
+	mu              sync.RWMutex
+	sessionIdLookup map[string]*domain.Session
+	generator       domain.SessionGenerator
+	clock           clockwork.Clock
 }
 
 func NewSessionCache(generator domain.SessionGenerator, clock clockwork.Clock) *SessionCache {
 	return &SessionCache{
-		sessions:  make(map[string]domain.Session),
-		generator: generator,
-		clock:     clock,
+		sessionIdLookup: make(map[string]*domain.Session),
+		generator:       generator,
+		clock:           clock,
 	}
 }
 
@@ -29,16 +29,16 @@ func (ctx *SessionCache) Create(accountId string) domain.Session {
 		AccountId: accountId,
 		CreatedAt: ctx.clock.Now(),
 	}
-	ctx.sessions[session.Id] = session
+	ctx.sessionIdLookup[session.Id] = &session
 	return session
 }
 
 func (ctx *SessionCache) GetBySessionId(sessionId string) (domain.Session, bool) {
 	ctx.mu.RLock()
 	defer ctx.mu.RUnlock()
-	session, exists := ctx.sessions[sessionId]
+	session, exists := ctx.sessionIdLookup[sessionId]
 	if exists {
-		return session, true
+		return *session, true
 	} else {
 		return domain.Session{}, false
 	}
