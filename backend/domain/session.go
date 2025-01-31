@@ -16,4 +16,5 @@ var ErrSessionNotFound = errors.New("session not found")
 type SessionDao interface {
 	Create(accountId string) Session
 	GetBySessionId(sessionId string) (Session, bool)
+	GetByAccountId(accountId string) (Session, bool)
 }

@@ -29,4 +29,18 @@ func TestSessionCache_CreateAndGet(t *testing.T) {
 	if session.Id != expectedSession.Id {
 		t.Errorf("session Id should be %s, got %s", expectedSession.Id, session.Id)
 	}
+
+	session, exists = cache.GetByAccountId(expectedSession.AccountId)
+	if !exists {
+		t.Errorf("session '%s'should exist", expectedSession.AccountId)
+	}
+	if session.CreatedAt != expectedCreationTime {
+		t.Errorf("session createdAt should be %v, got %v", expectedCreationTime, session.CreatedAt)
+	}
+	if session.AccountId != "abc" {
+		t.Errorf("session accountId should be %s, got %s", expectedSession.AccountId, session.AccountId)
+	}
+	if session.Id != expectedSession.Id {
+		t.Errorf("session Id should be %s, got %s", expectedSession.Id, session.Id)
+	}
 }
