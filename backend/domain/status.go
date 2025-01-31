@@ -10,6 +10,6 @@ type Status struct {
 
 type StatusDao interface {
 	UpdateOnline(id string, isOnline bool)
-	IsOnline(id string) (bool, error)
+	Get(id string) (Status, error)
 	FetchAll(ids []string) []Status
 }

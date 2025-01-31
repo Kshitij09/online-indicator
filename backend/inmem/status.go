@@ -58,12 +58,12 @@ func (ctx *StatusCache) FetchAll(ids []string) []domain.Status {
 	return result
 }
 
-func (ctx *StatusCache) IsOnline(id string) (bool, error) {
+func (ctx *StatusCache) Get(id string) (domain.Status, error) {
 	status, err := ctx.get(id)
 	if err != nil {
-		return false, err
+		return domain.Status{}, err
 	} else {
-		return status.IsOnline, nil
+		return *status, nil
 	}
 }
 

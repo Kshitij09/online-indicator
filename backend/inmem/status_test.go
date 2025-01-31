@@ -16,12 +16,12 @@ func TestStatusCache_Update(t *testing.T) {
 	cache := NewStatusCache(fakeClock)
 	expected := domain.Status{Id: "1", IsOnline: true, LastOnline: expectedTime}
 	cache.UpdateOnline(expected.Id, expected.IsOnline)
-	online, err := cache.IsOnline(expected.Id)
+	status, err := cache.Get(expected.Id)
 	if err != nil {
 		t.Error(err)
 	}
-	if online != expected.IsOnline {
-		t.Errorf("expected online=%v, got %v", expected.IsOnline, online)
+	if status.IsOnline != expected.IsOnline {
+		t.Errorf("expected status=%v, got %v", expected.IsOnline, status)
 	}
 	lastOnline, err := cache.LastOnline(expected.Id)
 	if err != nil {
@@ -40,12 +40,12 @@ func TestStatusCache_LatestFetch(t *testing.T) {
 	updated.IsOnline = true
 	expectedOnlineTime := fakeClock.Now()
 	cache.UpdateOnline(updated.Id, updated.IsOnline)
-	online, err := cache.IsOnline(updated.Id)
+	status, err := cache.Get(updated.Id)
 	if err != nil {
 		t.Error(err)
 	}
-	if online != updated.IsOnline {
-		t.Errorf("expected online=%v, got %v", updated.IsOnline, online)
+	if status.IsOnline != updated.IsOnline {
+		t.Errorf("expected status=%v, got %v", updated.IsOnline, status)
 	}
 	lastOnline, err := cache.LastOnline(updated.Id)
 	if err != nil {
@@ -76,12 +76,12 @@ func TestStatusCache_ConcurrentReadWrite(t *testing.T) {
 
 	for i := 0; i < 1000; i++ {
 		expected := expectedEntries[i]
-		actualOnline, err := cache.IsOnline(expected.Id)
+		status, err := cache.Get(expected.Id)
 		if err != nil {
 			t.Error(err)
 		}
-		if actualOnline != expected.IsOnline {
-			t.Errorf("expected online for id %v=%v, got %v", expected.Id, expected.IsOnline, actualOnline)
+		if status.IsOnline != expected.IsOnline {
+			t.Errorf("expected online for id %v=%v, got %v", expected.Id, expected.IsOnline, status)
 		}
 	}
 }
