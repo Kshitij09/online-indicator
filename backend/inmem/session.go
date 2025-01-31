@@ -33,7 +33,7 @@ func (ctx *SessionCache) Create(accountId string) domain.Session {
 	return session
 }
 
-func (ctx *SessionCache) Get(sessionId string) (domain.Session, bool) {
+func (ctx *SessionCache) GetBySessionId(sessionId string) (domain.Session, bool) {
 	ctx.mu.RLock()
 	defer ctx.mu.RUnlock()
 	session, exists := ctx.sessions[sessionId]

@@ -25,7 +25,7 @@ func NewStatusService(status StatusDao, session SessionDao, onlineThreshold time
 }
 
 func (ctx *StatusService) Ping(sessionId string) error {
-	session, exists := ctx.session.Get(sessionId)
+	session, exists := ctx.session.GetBySessionId(sessionId)
 	if !exists {
 		return ErrSessionNotFound
 	}

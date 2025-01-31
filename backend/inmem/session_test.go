@@ -11,11 +11,11 @@ func TestSessionCache_CreateAndGet(t *testing.T) {
 	clock := clockwork.NewFakeClock()
 	cache := NewSessionCache(staticGen, clock)
 	expectedSession := cache.Create("abc")
-	session, exists := cache.Get("non-existent")
+	session, exists := cache.GetBySessionId("non-existent")
 	if exists {
 		t.Errorf("session '%s'should not exist", "non-existent")
 	}
-	session, exists = cache.Get(expectedSession.Id)
+	session, exists = cache.GetBySessionId(expectedSession.Id)
 	if !exists {
 		t.Errorf("session '%s'should exist", expectedSession.AccountId)
 	}
