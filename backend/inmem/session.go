@@ -2,33 +2,43 @@ package inmem
 
 import (
 	"github.com/Kshitij09/online-indicator/domain"
+	"github.com/jonboulle/clockwork"
 	"sync"
 )
 
 type SessionCache struct {
-	mu       sync.RWMutex
-	sessions map[string]domain.Session
+	mu        sync.RWMutex
+	sessions  map[string]domain.Session
+	generator domain.SessionGenerator
+	clock     clockwork.Clock
 }
 
-func NewSessionCache() *SessionCache {
+func NewSessionCache(generator domain.SessionGenerator, clock clockwork.Clock) *SessionCache {
 	return &SessionCache{
-		sessions: make(map[string]domain.Session),
+		sessions:  make(map[string]domain.Session),
+		generator: generator,
+		clock:     clock,
 	}
 }
 
-func (ctx *SessionCache) Create(session domain.Session) {
+func (ctx *SessionCache) Create(accountId string) domain.Session {
 	ctx.mu.Lock()
 	defer ctx.mu.Unlock()
-	ctx.sessions[session.Id] = session
+	session := domain.Session{
+		Id:        ctx.generator.Generate(),
+		CreatedAt: ctx.clock.Now(),
+	}
+	ctx.sessions[accountId] = session
+	return session
 }
 
-func (ctx *SessionCache) Get(id string) (domain.Session, error) {
+func (ctx *SessionCache) Get(accountId string) (domain.Session, bool) {
 	ctx.mu.RLock()
 	defer ctx.mu.RUnlock()
-	session, exists := ctx.sessions[id]
+	session, exists := ctx.sessions[accountId]
 	if exists {
-		return session, nil
+		return session, true
 	} else {
-		return domain.Session{}, domain.ErrInvalidSession
+		return domain.Session{}, false
 	}
 }

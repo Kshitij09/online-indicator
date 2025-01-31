@@ -20,3 +20,23 @@ type AuthDao interface {
 	Update(Account) error
 	Delete(name string) error
 }
+
+type LoginService struct {
+	auth    AuthDao
+	session SessionDao
+}
+
+func NewLoginService(auth AuthDao, session SessionDao) LoginService {
+	return LoginService{
+		auth:    auth,
+		session: session,
+	}
+}
+
+func (s LoginService) Login(name string, token string) (Session, error) {
+	err := s.auth.Login(name, token)
+	if err != nil {
+		return Session{}, err
+	}
+	return s.session.Create(name), nil
+}

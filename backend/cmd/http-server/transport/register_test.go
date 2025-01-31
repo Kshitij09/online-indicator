@@ -20,9 +20,9 @@ func TestRegisterHandler_Success(t *testing.T) {
 		t.Error(err)
 	}
 	recorder := httptest.NewRecorder()
-	tokenGen := stubs.StaticTokenGenerator{StubToken: "1"}
+	staticGenerator := stubs.StaticGenerator{StubValue: "1"}
 	fakeClock := clockwork.NewFakeClock()
-	handler := registerHandler(tokenGen, fakeClock)
+	handler := registerHandler(staticGenerator, staticGenerator, fakeClock)
 	handler(recorder, req)
 
 	result := recorder.Result()
@@ -34,8 +34,8 @@ func TestRegisterHandler_Success(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if resp.Token != tokenGen.StubToken {
-		t.Errorf("token incorrect, expected %s, got %s", tokenGen.StubToken, resp.Token)
+	if resp.Token != staticGenerator.StubValue {
+		t.Errorf("token incorrect, expected %s, got %s", staticGenerator.StubValue, resp.Token)
 	}
 }
 
@@ -46,9 +46,9 @@ func TestRegisterHandler_AccountExists(t *testing.T) {
 		t.Error(err)
 	}
 	recorder := httptest.NewRecorder()
-	tokenGen := stubs.StaticTokenGenerator{StubToken: "1"}
+	staticGenerator := stubs.StaticGenerator{StubValue: "1"}
 	fakeClock := clockwork.NewFakeClock()
-	storage := inmem.NewStorage(tokenGen, fakeClock)
+	storage := inmem.NewStorage(staticGenerator, staticGenerator, fakeClock)
 	register := RegisterHandler(storage)
 	handler := NewHttpHandler(register)
 
@@ -85,9 +85,9 @@ func TestRegisterHandler_NameRequired(t *testing.T) {
 		t.Error(err)
 	}
 	recorder := httptest.NewRecorder()
-	tokenGen := stubs.StaticTokenGenerator{StubToken: "1"}
+	staticGenerator := stubs.StaticGenerator{StubValue: "1"}
 	fakeClock := clockwork.NewFakeClock()
-	handler := registerHandler(tokenGen, fakeClock)
+	handler := registerHandler(staticGenerator, staticGenerator, fakeClock)
 
 	handler(recorder, req)
 
@@ -122,8 +122,8 @@ func createRegisterRequest(req RegisterRequest) (*http.Request, error) {
 	return httpReq, nil
 }
 
-func registerHandler(tokenGen domain.TokenGenerator, clock clockwork.Clock) http.HandlerFunc {
-	storage := inmem.NewStorage(tokenGen, clock)
+func registerHandler(tokenGen domain.TokenGenerator, sessionGen domain.SessionGenerator, clock clockwork.Clock) http.HandlerFunc {
+	storage := inmem.NewStorage(tokenGen, sessionGen, clock)
 	register := RegisterHandler(storage)
 	return NewHttpHandler(register)
 }

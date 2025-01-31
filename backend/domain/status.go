@@ -24,9 +24,9 @@ func NewStatusService(status StatusDao, session SessionDao) StatusService {
 }
 
 func (ctx *StatusService) Ping(sessionId string) error {
-	session, err := ctx.session.Get(sessionId)
-	if err != nil {
-		return err
+	session, exists := ctx.session.Get(sessionId)
+	if !exists {
+		return ErrSessionNotFound
 	}
 	ctx.status.UpdateOnline(session.Id, true)
 	return nil

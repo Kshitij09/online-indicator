@@ -11,10 +11,14 @@ type Storage struct {
 	status  domain.StatusDao
 }
 
-func NewStorage(tokenGen domain.TokenGenerator, clock clockwork.Clock) *Storage {
+func NewStorage(
+	tokenGen domain.TokenGenerator,
+	sessionGen domain.SessionGenerator,
+	clock clockwork.Clock,
+) *Storage {
 	return &Storage{
 		auth:    NewAuthDao(tokenGen),
-		session: NewSessionCache(),
+		session: NewSessionCache(sessionGen, clock),
 		status:  NewStatusCache(clock),
 	}
 }

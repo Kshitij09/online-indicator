@@ -15,8 +15,9 @@ func main() {
 	flag.IntVar(port, "p", defaultPort, portUsage)
 	flag.Parse()
 	tokenGen := domain.NewUUIDTokenGenerator()
+	sessionGen := domain.NewUUIDSessionGenerator()
 	realClock := clockwork.NewRealClock()
-	storage := inmem.NewStorage(tokenGen, realClock)
+	storage := inmem.NewStorage(tokenGen, sessionGen, realClock)
 	server := transport.NewServer(storage)
 	err := server.Run(*port)
 	if err != nil {

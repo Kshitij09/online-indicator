@@ -10,9 +10,9 @@ type Session struct {
 	CreatedAt time.Time
 }
 
-var ErrInvalidSession = errors.New("invalid session")
+var ErrSessionNotFound = errors.New("session not found")
 
 type SessionDao interface {
-	Create(Session)
-	Get(id string) (Session, error)
+	Create(accountId string) Session
+	Get(accountId string) (Session, bool)
 }

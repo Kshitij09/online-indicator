@@ -1,9 +1,9 @@
 package stubs
 
-type StaticTokenGenerator struct {
-	StubToken string
+type StaticGenerator struct {
+	StubValue string
 }
 
-func (ctx StaticTokenGenerator) Generate() string {
-	return ctx.StubToken
+func (ctx StaticGenerator) Generate() string {
+	return ctx.StubValue
 }

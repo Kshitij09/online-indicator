@@ -16,10 +16,11 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	Token string `json:"token"`
+	SessionId string `json:"sessionId"`
 }
 
 func LoginHandler(storage domain.Storage) handlers.Handler {
+	service := domain.NewLoginService(storage.Auth(), storage.Session())
 	return func(w http.ResponseWriter, r *http.Request) error {
 		if r.Body == http.NoBody {
 			return apierror.SimpleAPIError(http.StatusBadRequest, "Request Body is missing")
@@ -34,7 +35,7 @@ func LoginHandler(storage domain.Storage) handlers.Handler {
 			return apierror.SimpleAPIError(http.StatusBadRequest, "name is required")
 		}
 
-		acc, err := storage.Auth().Login(req.Name, req.Token)
+		session, err := service.Login(req.Name, req.Token)
 		if errors.Is(err, domain.ErrAccountNotFound) {
 			return apierror.SimpleAPIError(http.StatusNotFound, "account does not exist")
 		}
@@ -42,7 +43,7 @@ func LoginHandler(storage domain.Storage) handlers.Handler {
 			return apierror.SimpleAPIError(http.StatusUnauthorized, "invalid credentials")
 		}
 		response := LoginResponse{
-			Token: acc.Token,
+			SessionId: session.Id,
 		}
 		err = json.NewEncoder(w).Encode(response)
 		return err
