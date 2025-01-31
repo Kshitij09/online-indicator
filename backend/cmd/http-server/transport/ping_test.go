@@ -3,6 +3,7 @@ package transport
 import (
 	"github.com/Kshitij09/online-indicator/cmd/http-server/test"
 	"github.com/Kshitij09/online-indicator/domain"
+	"github.com/Kshitij09/online-indicator/domain/service"
 	"github.com/Kshitij09/online-indicator/domain/stubs"
 	"github.com/Kshitij09/online-indicator/inmem"
 	"github.com/jonboulle/clockwork"
@@ -49,7 +50,7 @@ func TestPingHandler_OK(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	loginService := domain.NewAuthService(storage.Auth(), storage.Session(), storage.Profile())
+	loginService := service.NewAuthService(storage.Auth(), storage.Session(), storage.Profile())
 	session, err := loginService.Login(account.Name, account.Token)
 	if err != nil {
 		t.Error(err)

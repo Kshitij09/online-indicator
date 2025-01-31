@@ -13,22 +13,3 @@ type StatusDao interface {
 	IsOnline(id string) (bool, error)
 	FetchAll(ids []string) []Status
 }
-
-type StatusService struct {
-	status          StatusDao
-	session         SessionDao
-	onlineThreshold time.Duration
-}
-
-func NewStatusService(status StatusDao, session SessionDao, onlineThreshold time.Duration) StatusService {
-	return StatusService{status: status, session: session, onlineThreshold: onlineThreshold}
-}
-
-func (ctx *StatusService) Ping(sessionId string) error {
-	session, exists := ctx.session.GetBySessionId(sessionId)
-	if !exists {
-		return ErrSessionNotFound
-	}
-	ctx.status.UpdateOnline(session.Id, true)
-	return nil
-}
