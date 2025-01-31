@@ -5,6 +5,7 @@ import "errors"
 type Account struct {
 	Name  string
 	Token string
+	Id    string
 }
 
 var EmptyAccount = Account{}

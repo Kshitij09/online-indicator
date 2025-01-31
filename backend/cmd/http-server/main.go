@@ -22,7 +22,8 @@ func main() {
 	tokenGen := domain.NewUUIDTokenGenerator()
 	sessionGen := domain.NewUUIDSessionGenerator()
 	realClock := clockwork.NewRealClock()
-	storage := inmem.NewStorage(tokenGen, sessionGen, realClock)
+	idGen := domain.NewSeqIdGenerator()
+	storage := inmem.NewStorage(tokenGen, sessionGen, realClock, idGen)
 	server := transport.NewServer(storage, DefaultConfig)
 	err := server.Run(*port)
 	if err != nil {

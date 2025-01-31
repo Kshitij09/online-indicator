@@ -15,9 +15,10 @@ func NewStorage(
 	tokenGen domain.TokenGenerator,
 	sessionGen domain.SessionGenerator,
 	clock clockwork.Clock,
+	idGen domain.IDGenerator,
 ) *Storage {
 	return &Storage{
-		auth:    NewAuthDao(tokenGen),
+		auth:    NewAuthDao(tokenGen, idGen),
 		session: NewSessionCache(sessionGen, clock),
 		status:  NewStatusCache(clock),
 	}

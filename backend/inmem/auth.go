@@ -7,12 +7,14 @@ import (
 type AuthCache struct {
 	accounts       map[string]domain.Account
 	tokenGenerator domain.TokenGenerator
+	idGenerator    domain.IDGenerator
 }
 
-func NewAuthDao(tokenGenerator domain.TokenGenerator) domain.AuthDao {
+func NewAuthDao(tokenGenerator domain.TokenGenerator, idGenerator domain.IDGenerator) domain.AuthDao {
 	return &AuthCache{
 		accounts:       make(map[string]domain.Account),
 		tokenGenerator: tokenGenerator,
+		idGenerator:    idGenerator,
 	}
 }
 
@@ -24,6 +26,7 @@ func (ctx *AuthCache) Create(account domain.Account) (domain.Account, error) {
 		return domain.EmptyAccount, domain.ErrEmptyName
 	}
 	account.Token = ctx.tokenGenerator.Generate()
+	account.Id = ctx.idGenerator.Generate()
 	ctx.accounts[account.Name] = account
 	return account, nil
 }
