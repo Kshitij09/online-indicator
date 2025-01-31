@@ -25,12 +25,14 @@ type AuthDao interface {
 type AuthService struct {
 	auth    AuthDao
 	session SessionDao
+	profile ProfileDao
 }
 
-func NewAuthService(auth AuthDao, session SessionDao) AuthService {
+func NewAuthService(auth AuthDao, session SessionDao, profile ProfileDao) AuthService {
 	return AuthService{
 		auth:    auth,
 		session: session,
+		profile: profile,
 	}
 }
 
@@ -40,4 +42,20 @@ func (s AuthService) Login(name string, token string) (Session, error) {
 		return Session{}, err
 	}
 	return s.session.Create(name), nil
+}
+
+func (s AuthService) CreateAccount(account Account) (Account, error) {
+	acc, err := s.auth.Create(account)
+	if err != nil {
+		return EmptyAccount, err
+	}
+	profile := Profile{
+		Id:       acc.Id,
+		Username: acc.Name,
+	}
+	err = s.profile.Create(profile)
+	if err != nil {
+		return EmptyAccount, err
+	}
+	return acc, nil
 }

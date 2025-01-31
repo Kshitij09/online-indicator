@@ -9,6 +9,7 @@ type Storage struct {
 	auth    domain.AuthDao
 	session domain.SessionDao
 	status  domain.StatusDao
+	profile domain.ProfileDao
 }
 
 func NewStorage(
@@ -21,6 +22,7 @@ func NewStorage(
 		auth:    NewAuthDao(tokenGen, idGen),
 		session: NewSessionCache(sessionGen, clock),
 		status:  NewStatusCache(clock),
+		profile: NewProfileCache(),
 	}
 }
 
@@ -31,3 +33,5 @@ func (ctx Storage) Auth() domain.AuthDao {
 func (ctx Storage) Session() domain.SessionDao { return ctx.session }
 
 func (ctx Storage) Status() domain.StatusDao { return ctx.status }
+
+func (ctx Storage) Profile() domain.ProfileDao { return ctx.profile }

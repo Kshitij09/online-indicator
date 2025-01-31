@@ -20,7 +20,7 @@ type LoginResponse struct {
 }
 
 func LoginHandler(storage domain.Storage) handlers.Handler {
-	service := domain.NewAuthService(storage.Auth(), storage.Session())
+	service := domain.NewAuthService(storage.Auth(), storage.Session(), storage.Profile())
 	return func(w http.ResponseWriter, r *http.Request) error {
 		if r.Body == http.NoBody {
 			return apierror.SimpleAPIError(http.StatusBadRequest, "Request Body is missing")

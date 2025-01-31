@@ -14,7 +14,7 @@ import (
 func TestPingHandler_Unauthorized(t *testing.T) {
 	clock := clockwork.NewFakeClock()
 	staticGen := stubs.StaticGenerator{}
-	storage := inmem.NewStorage(staticGen, staticGen, clock)
+	storage := inmem.NewStorage(staticGen, staticGen, clock, staticGen)
 	handler := NewHttpHandler(PingHandler(storage, test.Config))
 
 	recorder := httptest.NewRecorder()
@@ -41,7 +41,7 @@ func TestPingHandler_OK(t *testing.T) {
 		StubValue: "123",
 	}
 	clock := clockwork.NewFakeClock()
-	storage := inmem.NewStorage(staticGen, staticGen, clock)
+	storage := inmem.NewStorage(staticGen, staticGen, clock, staticGen)
 	account := domain.Account{
 		Name: "John Doe",
 	}
@@ -49,7 +49,7 @@ func TestPingHandler_OK(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	loginService := domain.NewAuthService(storage.Auth(), storage.Session())
+	loginService := domain.NewAuthService(storage.Auth(), storage.Session(), storage.Profile())
 	session, err := loginService.Login(account.Name, account.Token)
 	if err != nil {
 		t.Error(err)

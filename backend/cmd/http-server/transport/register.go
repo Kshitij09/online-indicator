@@ -19,6 +19,7 @@ type RegisterResponse struct {
 }
 
 func RegisterHandler(storage domain.Storage) handlers.Handler {
+	service := domain.NewAuthService(storage.Auth(), storage.Session(), storage.Profile())
 	return func(w http.ResponseWriter, r *http.Request) error {
 		if r.Body == http.NoBody {
 			return apierror.SimpleAPIError(http.StatusBadRequest, "Request Body is missing")
@@ -30,7 +31,7 @@ func RegisterHandler(storage domain.Storage) handlers.Handler {
 		}
 
 		acc := domain.Account{Name: req.Name}
-		created, err := storage.Auth().Create(acc)
+		created, err := service.CreateAccount(acc)
 		if errors.Is(err, domain.ErrAccountAlreadyExists) {
 			return apierror.SimpleAPIError(http.StatusConflict, "account already exists")
 		}
