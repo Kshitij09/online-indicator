@@ -26,6 +26,8 @@ func (s *Server) Run(port int) error {
 	router.HandleFunc("POST /register", NewHttpHandler(register, logger))
 	login := LoginHandler(s.Storage)
 	router.HandleFunc("POST /login", NewHttpHandler(login, logger))
+	ping := PingHandler(s.Storage)
+	router.HandleFunc("POST /ping", NewHttpHandler(ping, logger))
 	server := &http.Server{
 		Addr:    listAddr,
 		Handler: router,

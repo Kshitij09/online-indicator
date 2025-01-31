@@ -2,6 +2,7 @@ package transport
 
 import (
 	"encoding/json"
+	"errors"
 	"fmt"
 	"github.com/Kshitij09/online-indicator/cmd/http-server/transport/apierror"
 	"github.com/Kshitij09/online-indicator/cmd/http-server/transport/handlers"
@@ -10,14 +11,16 @@ import (
 )
 
 type LoginRequest struct {
-	Name string `json:"name"`
-}
-
-type LoginResponse struct {
+	Name  string `json:"name"`
 	Token string `json:"token"`
 }
 
+type LoginResponse struct {
+	SessionId string `json:"sessionId"`
+}
+
 func LoginHandler(storage domain.Storage) handlers.Handler {
+	service := domain.NewLoginService(storage.Auth(), storage.Session())
 	return func(w http.ResponseWriter, r *http.Request) error {
 		if r.Body == http.NoBody {
 			return apierror.SimpleAPIError(http.StatusBadRequest, "Request Body is missing")
@@ -32,14 +35,17 @@ func LoginHandler(storage domain.Storage) handlers.Handler {
 			return apierror.SimpleAPIError(http.StatusBadRequest, "name is required")
 		}
 
-		acc, exists := storage.Auth().Get(req.Name)
-		if !exists {
+		session, err := service.Login(req.Name, req.Token)
+		if errors.Is(err, domain.ErrAccountNotFound) {
 			return apierror.SimpleAPIError(http.StatusNotFound, "account does not exist")
 		}
-		response := LoginResponse{
-			Token: acc.Token,
+		if errors.Is(err, domain.ErrInvalidCredentials) {
+			return apierror.SimpleAPIError(http.StatusUnauthorized, "invalid credentials")
 		}
-		err := json.NewEncoder(w).Encode(response)
+		response := LoginResponse{
+			SessionId: session.Id,
+		}
+		err = json.NewEncoder(w).Encode(response)
 		return err
 	}
 }
