@@ -51,19 +51,16 @@ func TestAuthCache_Get(t *testing.T) {
 	tokenGen := stubs.StaticTokenGenerator{StubToken: "1"}
 	cache := NewAuthDao(tokenGen)
 	acc := domain.Account{Name: "John Doe"}
-	_, err := cache.Login(acc.Name, tokenGen.StubToken)
+	err := cache.Login(acc.Name, tokenGen.StubToken)
 	if err == nil {
 		t.Errorf("expected %v initially, got nil", domain.ErrAccountNotFound)
 	}
-	created, err := cache.Create(acc)
+	_, err = cache.Create(acc)
 	if err != nil {
 		t.Error(err)
 	}
-	fetched, err := cache.Login(acc.Name, tokenGen.StubToken)
+	err = cache.Login(acc.Name, tokenGen.StubToken)
 	if err != nil {
 		t.Errorf("expected successful login, got %v", err)
-	}
-	if fetched.Token != created.Token {
-		t.Errorf("expected token %s, got %s", created.Token, fetched.Token)
 	}
 }
