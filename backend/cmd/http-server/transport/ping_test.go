@@ -49,7 +49,7 @@ func TestPingHandler_OK(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	loginService := domain.NewLoginService(storage.Auth(), storage.Session())
+	loginService := domain.NewAuthService(storage.Auth(), storage.Session())
 	session, err := loginService.Login(account.Name, account.Token)
 	if err != nil {
 		t.Error(err)
