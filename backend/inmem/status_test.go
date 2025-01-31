@@ -3,6 +3,7 @@ package inmem
 import (
 	"fmt"
 	"github.com/Kshitij09/online-indicator/domain"
+	"github.com/jonboulle/clockwork"
 	"math/rand"
 	"sync"
 	"testing"
@@ -10,8 +11,10 @@ import (
 )
 
 func TestStatusCache_Update(t *testing.T) {
-	cache := NewStatusCache()
-	expected := domain.Status{Id: "1", IsOnline: true}
+	fakeClock := clockwork.NewFakeClock()
+	expectedTime := fakeClock.Now()
+	cache := NewStatusCache(fakeClock)
+	expected := domain.Status{Id: "1", IsOnline: true, LastOnline: expectedTime}
 	cache.Update(expected)
 	online, err := cache.IsOnline(expected.Id)
 	if err != nil {
@@ -20,27 +23,41 @@ func TestStatusCache_Update(t *testing.T) {
 	if online != expected.IsOnline {
 		t.Errorf("expected online=%v, got %v", expected.IsOnline, online)
 	}
+	lastOnline, err := cache.LastOnline(expected.Id)
+	if err != nil {
+		t.Error(err)
+	}
+	if lastOnline != expected.LastOnline {
+		t.Errorf("expected lastOnline=%v, got %v", expected.LastOnline, lastOnline)
+	}
 }
 
 func TestStatusCache_LatestFetch(t *testing.T) {
-	cache := NewStatusCache()
-	expected := domain.Status{Id: "1", IsOnline: true}
+	fakeClock := clockwork.NewFakeClock()
+	cache := NewStatusCache(fakeClock)
 	updated := domain.Status{Id: "2", IsOnline: false}
-	cache.Update(expected)
 	cache.Update(updated)
 	updated.IsOnline = true
+	expectedOnlineTime := fakeClock.Now()
 	cache.Update(updated)
 	online, err := cache.IsOnline(updated.Id)
 	if err != nil {
 		t.Error(err)
 	}
 	if online != updated.IsOnline {
-		t.Errorf("expected online=%v, got %v", expected.IsOnline, online)
+		t.Errorf("expected online=%v, got %v", updated.IsOnline, online)
+	}
+	lastOnline, err := cache.LastOnline(updated.Id)
+	if err != nil {
+		t.Error(err)
+	}
+	if lastOnline != expectedOnlineTime {
+		t.Errorf("expected lastOnline=%v, got %v", expectedOnlineTime, lastOnline)
 	}
 }
 
 func TestStatusCache_ConcurrentReadWrite(t *testing.T) {
-	cache := NewStatusCache()
+	cache := NewStatusCache(clockwork.NewFakeClock())
 	expectedEntries := make([]domain.Status, 0, 1000)
 	var wg sync.WaitGroup
 	random := rand.New(rand.NewSource(40))

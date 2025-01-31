@@ -3,23 +3,28 @@ package inmem
 import (
 	"fmt"
 	"github.com/Kshitij09/online-indicator/domain"
+	"github.com/jonboulle/clockwork"
 	"sync"
+	"time"
 )
 
 type StatusCache struct {
 	mu     sync.RWMutex
 	online map[string]domain.Status
+	clock  clockwork.Clock
 }
 
-func NewStatusCache() *StatusCache {
+func NewStatusCache(clock clockwork.Clock) *StatusCache {
 	return &StatusCache{
 		online: make(map[string]domain.Status),
+		clock:  clock,
 	}
 }
 
 func (ctx *StatusCache) Update(status domain.Status) {
 	ctx.mu.Lock()
 	defer ctx.mu.Unlock()
+	status.LastOnline = ctx.clock.Now()
 	ctx.online[status.Id] = status
 }
 
@@ -42,5 +47,15 @@ func (ctx *StatusCache) IsOnline(id string) (bool, error) {
 		return status.IsOnline, nil
 	} else {
 		return false, fmt.Errorf("id %v not found", id)
+	}
+}
+
+func (ctx *StatusCache) LastOnline(id string) (time.Time, error) {
+	ctx.mu.RLock()
+	defer ctx.mu.RUnlock()
+	if status, ok := ctx.online[id]; ok {
+		return status.LastOnline, nil
+	} else {
+		return time.Time{}, fmt.Errorf("id %v not found", id)
 	}
 }
