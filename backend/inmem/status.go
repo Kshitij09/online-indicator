@@ -9,22 +9,22 @@ import (
 )
 
 type StatusCache struct {
-	mu     sync.RWMutex
-	online map[string]*domain.Status
-	clock  clockwork.Clock
+	mu    sync.RWMutex
+	items map[string]*domain.Status
+	clock clockwork.Clock
 }
 
 func NewStatusCache(clock clockwork.Clock) *StatusCache {
 	return &StatusCache{
-		online: make(map[string]*domain.Status),
-		clock:  clock,
+		items: make(map[string]*domain.Status),
+		clock: clock,
 	}
 }
 
 func (ctx *StatusCache) UpdateOnline(id string, isOnline bool) {
 	ctx.mu.Lock()
 	defer ctx.mu.Unlock()
-	status, exists := ctx.online[id]
+	status, exists := ctx.items[id]
 	if !exists {
 		status = &domain.Status{
 			Id:       id,
@@ -35,7 +35,7 @@ func (ctx *StatusCache) UpdateOnline(id string, isOnline bool) {
 		status.LastOnline = ctx.clock.Now()
 	}
 	status.IsOnline = isOnline
-	ctx.online[id] = status
+	ctx.items[id] = status
 }
 
 func (ctx *StatusCache) FetchAll(ids []string) []domain.Status {
@@ -43,7 +43,7 @@ func (ctx *StatusCache) FetchAll(ids []string) []domain.Status {
 	defer ctx.mu.Unlock()
 	result := make([]domain.Status, 0)
 	for _, id := range ids {
-		isOnline := ctx.online[id].IsOnline
+		isOnline := ctx.items[id].IsOnline
 		result = append(result, domain.Status{Id: id, IsOnline: isOnline})
 	}
 	return result
@@ -52,7 +52,7 @@ func (ctx *StatusCache) FetchAll(ids []string) []domain.Status {
 func (ctx *StatusCache) IsOnline(id string) (bool, error) {
 	ctx.mu.Lock()
 	defer ctx.mu.Unlock()
-	status, ok := ctx.online[id]
+	status, ok := ctx.items[id]
 	if ok {
 		return status.IsOnline, nil
 	} else {
@@ -63,7 +63,7 @@ func (ctx *StatusCache) IsOnline(id string) (bool, error) {
 func (ctx *StatusCache) LastOnline(id string) (time.Time, error) {
 	ctx.mu.RLock()
 	defer ctx.mu.RUnlock()
-	if status, ok := ctx.online[id]; ok {
+	if status, ok := ctx.items[id]; ok {
 		return status.LastOnline, nil
 	} else {
 		return time.Time{}, fmt.Errorf("id %v not found", id)
