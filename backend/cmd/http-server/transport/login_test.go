@@ -7,6 +7,7 @@ import (
 	"github.com/Kshitij09/online-indicator/domain"
 	"github.com/Kshitij09/online-indicator/domain/stubs"
 	"github.com/Kshitij09/online-indicator/inmem"
+	"github.com/jonboulle/clockwork"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -20,7 +21,8 @@ func TestLoginHandler_Success(t *testing.T) {
 	}
 	recorder := httptest.NewRecorder()
 	tokenGen := stubs.StaticTokenGenerator{StubToken: "1"}
-	storage := inmem.NewStorage(tokenGen)
+	fakeClock := clockwork.NewFakeClock()
+	storage := inmem.NewStorage(tokenGen, fakeClock)
 	handler := NewHttpHandler(LoginHandler(storage))
 
 	existing := domain.Account{Name: body.Name}
@@ -53,7 +55,8 @@ func TestLoginHandler_AccountNotFound(t *testing.T) {
 	}
 	recorder := httptest.NewRecorder()
 	tokenGen := stubs.StaticTokenGenerator{StubToken: "1"}
-	handler := loginHandler(tokenGen)
+	fakeClock := clockwork.NewFakeClock()
+	handler := loginHandler(tokenGen, fakeClock)
 
 	handler(recorder, req)
 
@@ -85,7 +88,8 @@ func TestLoginHandler_NameRequired(t *testing.T) {
 	}
 	recorder := httptest.NewRecorder()
 	tokenGen := stubs.StaticTokenGenerator{StubToken: "1"}
-	handler := loginHandler(tokenGen)
+	fakeClock := clockwork.NewFakeClock()
+	handler := loginHandler(tokenGen, fakeClock)
 
 	handler(recorder, req)
 
@@ -120,8 +124,8 @@ func createLoginRequest(req LoginRequest) (*http.Request, error) {
 	return httpReq, nil
 }
 
-func loginHandler(tokenGen domain.TokenGenerator) http.HandlerFunc {
-	storage := inmem.NewStorage(tokenGen)
+func loginHandler(tokenGen domain.TokenGenerator, clock clockwork.Clock) http.HandlerFunc {
+	storage := inmem.NewStorage(tokenGen, clock)
 	register := LoginHandler(storage)
 	return NewHttpHandler(register)
 }

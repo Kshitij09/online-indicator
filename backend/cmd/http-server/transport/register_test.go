@@ -7,6 +7,7 @@ import (
 	"github.com/Kshitij09/online-indicator/domain"
 	"github.com/Kshitij09/online-indicator/domain/stubs"
 	"github.com/Kshitij09/online-indicator/inmem"
+	"github.com/jonboulle/clockwork"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -20,7 +21,8 @@ func TestRegisterHandler_Success(t *testing.T) {
 	}
 	recorder := httptest.NewRecorder()
 	tokenGen := stubs.StaticTokenGenerator{StubToken: "1"}
-	handler := registerHandler(tokenGen)
+	fakeClock := clockwork.NewFakeClock()
+	handler := registerHandler(tokenGen, fakeClock)
 	handler(recorder, req)
 
 	result := recorder.Result()
@@ -45,7 +47,8 @@ func TestRegisterHandler_AccountExists(t *testing.T) {
 	}
 	recorder := httptest.NewRecorder()
 	tokenGen := stubs.StaticTokenGenerator{StubToken: "1"}
-	storage := inmem.NewStorage(tokenGen)
+	fakeClock := clockwork.NewFakeClock()
+	storage := inmem.NewStorage(tokenGen, fakeClock)
 	register := RegisterHandler(storage)
 	handler := NewHttpHandler(register)
 
@@ -83,7 +86,8 @@ func TestRegisterHandler_NameRequired(t *testing.T) {
 	}
 	recorder := httptest.NewRecorder()
 	tokenGen := stubs.StaticTokenGenerator{StubToken: "1"}
-	handler := registerHandler(tokenGen)
+	fakeClock := clockwork.NewFakeClock()
+	handler := registerHandler(tokenGen, fakeClock)
 
 	handler(recorder, req)
 
@@ -118,8 +122,8 @@ func createRegisterRequest(req RegisterRequest) (*http.Request, error) {
 	return httpReq, nil
 }
 
-func registerHandler(tokenGen domain.TokenGenerator) http.HandlerFunc {
-	storage := inmem.NewStorage(tokenGen)
+func registerHandler(tokenGen domain.TokenGenerator, clock clockwork.Clock) http.HandlerFunc {
+	storage := inmem.NewStorage(tokenGen, clock)
 	register := RegisterHandler(storage)
 	return NewHttpHandler(register)
 }

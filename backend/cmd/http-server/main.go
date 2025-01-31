@@ -5,6 +5,7 @@ import (
 	"github.com/Kshitij09/online-indicator/cmd/http-server/transport"
 	"github.com/Kshitij09/online-indicator/domain"
 	"github.com/Kshitij09/online-indicator/inmem"
+	"github.com/jonboulle/clockwork"
 )
 
 func main() {
@@ -14,7 +15,8 @@ func main() {
 	flag.IntVar(port, "p", defaultPort, portUsage)
 	flag.Parse()
 	tokenGen := domain.NewUUIDTokenGenerator()
-	storage := inmem.NewStorage(tokenGen)
+	realClock := clockwork.NewRealClock()
+	storage := inmem.NewStorage(tokenGen, realClock)
 	server := transport.NewServer(storage)
 	err := server.Run(*port)
 	if err != nil {
