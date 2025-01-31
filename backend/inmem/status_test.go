@@ -15,7 +15,7 @@ func TestStatusCache_Update(t *testing.T) {
 	expectedTime := fakeClock.Now()
 	cache := NewStatusCache(fakeClock)
 	expected := domain.Status{Id: "1", IsOnline: true, LastOnline: expectedTime}
-	cache.Update(expected)
+	cache.UpdateOnline(expected.Id, expected.IsOnline)
 	online, err := cache.IsOnline(expected.Id)
 	if err != nil {
 		t.Error(err)
@@ -36,10 +36,10 @@ func TestStatusCache_LatestFetch(t *testing.T) {
 	fakeClock := clockwork.NewFakeClock()
 	cache := NewStatusCache(fakeClock)
 	updated := domain.Status{Id: "2", IsOnline: false}
-	cache.Update(updated)
+	cache.UpdateOnline(updated.Id, updated.IsOnline)
 	updated.IsOnline = true
 	expectedOnlineTime := fakeClock.Now()
-	cache.Update(updated)
+	cache.UpdateOnline(updated.Id, updated.IsOnline)
 	online, err := cache.IsOnline(updated.Id)
 	if err != nil {
 		t.Error(err)
@@ -69,7 +69,7 @@ func TestStatusCache_ConcurrentReadWrite(t *testing.T) {
 			defer wg.Done()
 			delay := time.Duration(random.Intn(11)) * time.Millisecond
 			time.Sleep(delay)
-			cache.Update(expectedEntries[i])
+			cache.UpdateOnline(expectedEntries[i].Id, expectedEntries[i].IsOnline)
 		}()
 	}
 	wg.Wait()

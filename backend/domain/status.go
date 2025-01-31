@@ -9,7 +9,7 @@ type Status struct {
 }
 
 type StatusDao interface {
-	Update(Status)
+	UpdateOnline(id string, isOnline bool)
 	IsOnline(id string) (bool, error)
 	FetchAll(ids []string) []Status
 }
@@ -28,6 +28,6 @@ func (ctx *StatusService) Ping(sessionId string) error {
 	if err != nil {
 		return err
 	}
-	ctx.status.Update(Status{Id: session.Id, IsOnline: true})
+	ctx.status.UpdateOnline(session.Id, true)
 	return nil
 }

@@ -10,22 +10,32 @@ import (
 
 type StatusCache struct {
 	mu     sync.RWMutex
-	online map[string]domain.Status
+	online map[string]*domain.Status
 	clock  clockwork.Clock
 }
 
 func NewStatusCache(clock clockwork.Clock) *StatusCache {
 	return &StatusCache{
-		online: make(map[string]domain.Status),
+		online: make(map[string]*domain.Status),
 		clock:  clock,
 	}
 }
 
-func (ctx *StatusCache) Update(status domain.Status) {
+func (ctx *StatusCache) UpdateOnline(id string, isOnline bool) {
 	ctx.mu.Lock()
 	defer ctx.mu.Unlock()
-	status.LastOnline = ctx.clock.Now()
-	ctx.online[status.Id] = status
+	status, exists := ctx.online[id]
+	if !exists {
+		status = &domain.Status{
+			Id:       id,
+			IsOnline: isOnline,
+		}
+	}
+	if isOnline {
+		status.LastOnline = ctx.clock.Now()
+	}
+	status.IsOnline = isOnline
+	ctx.online[id] = status
 }
 
 func (ctx *StatusCache) FetchAll(ids []string) []domain.Status {
