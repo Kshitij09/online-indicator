@@ -1,6 +1,7 @@
 package inmem
 
 import (
+	"errors"
 	"github.com/Kshitij09/online-indicator/domain"
 	"reflect"
 	"testing"
@@ -19,6 +20,19 @@ func TestProfileCache_Create(t *testing.T) {
 	}
 	if !reflect.DeepEqual(actual, expected) {
 		t.Errorf("Created and Received profiles are different")
+	}
+}
+
+func TestProfileCache_CreateDuplicate(t *testing.T) {
+	cache := NewProfileCache()
+	expected := domain.Profile{Id: "1", Username: "test1"}
+	err := cache.Create(expected)
+	if err != nil {
+		t.Error(err)
+	}
+	err = cache.Create(expected)
+	if !errors.Is(err, domain.ErrProfileAlreadyExists) {
+		t.Errorf("expected error %v, got %v", domain.ErrProfileAlreadyExists, err)
 	}
 }
 
