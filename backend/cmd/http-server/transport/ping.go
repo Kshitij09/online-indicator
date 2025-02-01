@@ -16,7 +16,7 @@ type PingRequest struct {
 }
 
 func PingHandler(storage domain.Storage, config domain.Config) handlers.Handler {
-	service := service2.NewStatusService(storage.Status(), storage.Session(), config.OnlineThreshold)
+	service := service2.NewStatusService(storage.Status(), storage.Session(), config.OnlineThreshold, storage.Profile())
 	return func(w http.ResponseWriter, r *http.Request) error {
 		var req PingRequest
 		decodeErr := json.NewDecoder(r.Body).Decode(&req)
