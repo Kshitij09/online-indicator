@@ -44,16 +44,14 @@ func (ctx *StatusCache) UpdateOnline(id string, isOnline bool) {
 	status.IsOnline = isOnline
 }
 
-func (ctx *StatusCache) FetchAll(ids []string) []domain.Status {
-	ctx.mu.Lock()
-	defer ctx.mu.Unlock()
-	result := make([]domain.Status, 0)
+func (ctx *StatusCache) BatchGet(ids []string) map[string]domain.Status {
+	result := make(map[string]domain.Status)
 	for _, id := range ids {
 		status, err := ctx.get(id)
 		if err != nil {
 			continue
 		}
-		result = append(result, *status)
+		result[id] = *status
 	}
 	return result
 }

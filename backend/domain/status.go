@@ -28,5 +28,5 @@ func OfflineProfileStatus(profile Profile) ProfileStatus {
 type StatusDao interface {
 	UpdateOnline(id string, isOnline bool)
 	Get(id string) (Status, error)
-	FetchAll(ids []string) []Status
+	BatchGet(ids []string) map[string]Status
 }

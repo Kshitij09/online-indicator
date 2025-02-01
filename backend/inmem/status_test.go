@@ -4,7 +4,11 @@ import (
 	"fmt"
 	"github.com/Kshitij09/online-indicator/domain"
 	"github.com/jonboulle/clockwork"
+	"maps"
 	"math/rand"
+	"reflect"
+	"slices"
+	"strconv"
 	"sync"
 	"testing"
 	"time"
@@ -83,5 +87,27 @@ func TestStatusCache_ConcurrentReadWrite(t *testing.T) {
 		if status.IsOnline != expected.IsOnline {
 			t.Errorf("expected online for id %v=%v, got %v", expected.Id, expected.IsOnline, status)
 		}
+	}
+}
+
+func TestStatusCache_BatchGetByUserId(t *testing.T) {
+	clock := clockwork.NewFakeClock()
+	cache := NewStatusCache(clock)
+	random := rand.New(rand.NewSource(40))
+	expected := make(map[string]domain.Status)
+	for i := 0; i < 50; i++ {
+		userId := strconv.Itoa(i)
+		isOnline := random.Intn(2) == 0
+		lastOnline := time.Time{}
+		if isOnline {
+			lastOnline = clock.Now()
+		}
+		status := domain.Status{Id: userId, IsOnline: isOnline, LastOnline: lastOnline}
+		expected[userId] = status
+		cache.UpdateOnline(status.Id, status.IsOnline)
+	}
+	actual := cache.BatchGet(slices.Collect(maps.Keys(expected)))
+	if !reflect.DeepEqual(actual, expected) {
+		t.Errorf("Created and Received statuses are different")
 	}
 }
