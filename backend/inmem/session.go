@@ -57,3 +57,16 @@ func (ctx *SessionCache) GetByAccountId(accountId string) (domain.Session, bool)
 		return domain.Session{}, false
 	}
 }
+
+func (ctx *SessionCache) BatchGetByAccountId(ids []string) map[string]domain.Session {
+	result := make(map[string]domain.Session)
+	ctx.mu.RLock()
+	defer ctx.mu.RUnlock()
+	for _, id := range ids {
+		session, exists := ctx.accountIdLookup[id]
+		if exists {
+			result[id] = *session
+		}
+	}
+	return result
+}

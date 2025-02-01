@@ -1,8 +1,13 @@
 package inmem
 
 import (
+	"fmt"
+	"github.com/Kshitij09/online-indicator/domain"
 	"github.com/Kshitij09/online-indicator/domain/stubs"
 	"github.com/jonboulle/clockwork"
+	"maps"
+	"reflect"
+	"slices"
 	"testing"
 )
 
@@ -42,5 +47,21 @@ func TestSessionCache_CreateAndGet(t *testing.T) {
 	}
 	if session.Id != expectedSession.Id {
 		t.Errorf("session Id should be %s, got %s", expectedSession.Id, session.Id)
+	}
+}
+
+func TestSessionCache_BatchGetByAccountId(t *testing.T) {
+	staticGen := stubs.StaticGenerator{StubValue: "123"}
+	clock := clockwork.NewFakeClock()
+	cache := NewSessionCache(staticGen, clock)
+	expected := make(map[string]domain.Session)
+	for i := 0; i < 50; i++ {
+		accountId := fmt.Sprintf("test%d", i)
+		session := cache.Create(accountId)
+		expected[session.AccountId] = session
+	}
+	actual := cache.BatchGetByAccountId(slices.Collect(maps.Keys(expected)))
+	if !reflect.DeepEqual(actual, expected) {
+		t.Errorf("Created and Received profiles are different")
 	}
 }
