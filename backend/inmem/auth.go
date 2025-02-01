@@ -31,15 +31,15 @@ func (ctx *AuthCache) Create(account domain.Account) (domain.Account, error) {
 	return account, nil
 }
 
-func (ctx *AuthCache) Login(name string, token string) error {
+func (ctx *AuthCache) Login(name string, token string) (domain.Account, error) {
 	acc, exists := ctx.accounts[name]
 	if !exists {
-		return domain.ErrAccountNotFound
+		return domain.EmptyAccount, domain.ErrAccountNotFound
 	}
 	if acc.Token != token {
-		return domain.ErrInvalidCredentials
+		return domain.EmptyAccount, domain.ErrInvalidCredentials
 	}
-	return nil
+	return acc, nil
 }
 
 func (ctx *AuthCache) Delete(name string) error {

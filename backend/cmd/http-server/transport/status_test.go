@@ -1,6 +1,7 @@
 package transport
 
 import (
+	"encoding/json"
 	"github.com/Kshitij09/online-indicator/cmd/http-server/test"
 	"github.com/Kshitij09/online-indicator/domain"
 	"github.com/Kshitij09/online-indicator/domain/service"
@@ -9,6 +10,7 @@ import (
 	"github.com/jonboulle/clockwork"
 	"net/http"
 	"net/http/httptest"
+	"reflect"
 	"testing"
 )
 
@@ -46,6 +48,23 @@ func TestStatusHandler_Success(t *testing.T) {
 	expectedStatusCode := http.StatusOK
 	if result.StatusCode != expectedStatusCode {
 		t.Errorf("status code should be %d, got %d", expectedStatusCode, result.StatusCode)
+	}
+	var body StatusResponse
+	err = json.NewDecoder(result.Body).Decode(&body)
+	if err != nil {
+		t.Error(err)
+	}
+	expectedOnlineMillis := clock.Now().UnixMilli()
+	expectedBody := StatusResponse{
+		Id:         acc.Id,
+		Username:   acc.Name,
+		IsOnline:   true,
+		LastOnline: &expectedOnlineMillis,
+	}
+	if !reflect.DeepEqual(body, expectedBody) {
+		expectedBodyJson, _ := json.Marshal(expectedBody)
+		bodyJson, _ := json.Marshal(body)
+		t.Errorf("response body does not match\nexpected:\n%s\n\nactual:\n%s", string(expectedBodyJson), string(bodyJson))
 	}
 }
 

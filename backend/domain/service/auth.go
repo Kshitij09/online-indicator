@@ -17,11 +17,11 @@ func NewAuthService(auth domain.AuthDao, session domain.SessionDao, profile doma
 }
 
 func (s AuthService) Login(name string, token string) (domain.Session, error) {
-	err := s.auth.Login(name, token)
+	acc, err := s.auth.Login(name, token)
 	if err != nil {
 		return domain.Session{}, err
 	}
-	return s.session.Create(name), nil
+	return s.session.Create(acc.Id), nil
 }
 
 func (s AuthService) CreateAccount(account domain.Account) (domain.Account, error) {

@@ -44,7 +44,8 @@ func StatusHandler(storage domain.Storage, config domain.Config) handlers.Handle
 func toTransport(status domain.ProfileStatus) StatusResponse {
 	var lastOnlineEpochMillis *int64
 	if !status.LastOnline.IsZero() {
-		*lastOnlineEpochMillis = status.LastOnline.UnixMilli()
+		var onlineMillis = status.LastOnline.UnixMilli()
+		lastOnlineEpochMillis = &onlineMillis
 	}
 	return StatusResponse{
 		Id:         status.UserId,

@@ -17,7 +17,7 @@ var ErrInvalidCredentials = errors.New("invalid credentials")
 
 type AuthDao interface {
 	Create(Account) (Account, error)
-	Login(name string, token string) error
+	Login(name string, token string) (Account, error)
 	Update(Account) error
 	Delete(name string) error
 }
