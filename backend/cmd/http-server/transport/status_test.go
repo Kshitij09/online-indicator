@@ -48,3 +48,24 @@ func TestStatusHandler_Success(t *testing.T) {
 		t.Errorf("status code should be %d, got %d", expectedStatusCode, result.StatusCode)
 	}
 }
+
+func TestStatusHandler_AccountNotFound(t *testing.T) {
+	staticGen := stubs.StaticGenerator{StubValue: "123"}
+	clock := clockwork.NewFakeClock()
+	storage := inmem.NewStorage(staticGen, staticGen, clock, staticGen)
+	handler := NewHttpHandler(StatusHandler(storage, test.Config))
+
+	req, err := http.NewRequest(http.MethodGet, "/status", nil)
+	if err != nil {
+		t.Error(err)
+	}
+	req.SetPathValue("id", "john")
+	recorder := httptest.NewRecorder()
+	handler(recorder, req)
+
+	result := recorder.Result()
+	expectedStatusCode := http.StatusNotFound
+	if result.StatusCode != expectedStatusCode {
+		t.Errorf("status code should be %d, got %d", expectedStatusCode, result.StatusCode)
+	}
+}

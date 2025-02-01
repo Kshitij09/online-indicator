@@ -43,5 +43,9 @@ func (ctx *ProfileCache) GetByUserId(id string) (domain.Profile, bool) {
 	ctx.mu.RLock()
 	defer ctx.mu.RUnlock()
 	profile, exists := ctx.idLookup[id]
-	return *profile, exists
+	if exists {
+		return *profile, exists
+	} else {
+		return domain.EmptyProfile, false
+	}
 }
