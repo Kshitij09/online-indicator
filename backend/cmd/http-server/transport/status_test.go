@@ -88,3 +88,61 @@ func TestStatusHandler_AccountNotFound(t *testing.T) {
 		t.Errorf("status code should be %d, got %d", expectedStatusCode, result.StatusCode)
 	}
 }
+
+func TestStatusHandler_NoLoginAsOffline(t *testing.T) {
+	staticGen := stubs.StaticGenerator{StubValue: "123"}
+	clock := clockwork.NewFakeClock()
+	storage := inmem.NewStorage(staticGen, staticGen, clock, staticGen)
+	authService := service.NewAuthService(storage.Auth(), storage.Session(), storage.Profile())
+	acc := domain.Account{Name: "john"}
+	acc, err := authService.CreateAccount(acc)
+	if err != nil {
+		t.Error(err)
+	}
+	handler := NewHttpHandler(StatusHandler(storage, test.Config))
+
+	req, err := http.NewRequest(http.MethodGet, "/status", nil)
+	if err != nil {
+		t.Error(err)
+	}
+	req.SetPathValue("id", acc.Id)
+	recorder := httptest.NewRecorder()
+	handler(recorder, req)
+
+	result := recorder.Result()
+	expectedStatusCode := http.StatusOK
+	if result.StatusCode != expectedStatusCode {
+		t.Errorf("status code should be %d, got %d", expectedStatusCode, result.StatusCode)
+	}
+	var body StatusResponse
+	err = json.NewDecoder(result.Body).Decode(&body)
+	if err != nil {
+		t.Error(err)
+	}
+	if body.IsOnline {
+		t.Errorf("account should not be online")
+	}
+	if body.Username == "" || body.Id == "" {
+		t.Errorf("account details should not be empty")
+	}
+}
+
+func TestStatusHandler_MissingAccountId(t *testing.T) {
+	staticGen := stubs.StaticGenerator{StubValue: "123"}
+	clock := clockwork.NewFakeClock()
+	storage := inmem.NewStorage(staticGen, staticGen, clock, staticGen)
+	handler := NewHttpHandler(StatusHandler(storage, test.Config))
+
+	req, err := http.NewRequest(http.MethodGet, "/status", nil)
+	if err != nil {
+		t.Error(err)
+	}
+	recorder := httptest.NewRecorder()
+	handler(recorder, req)
+
+	result := recorder.Result()
+	expectedStatusCode := http.StatusBadRequest
+	if result.StatusCode != expectedStatusCode {
+		t.Errorf("status code should be %d, got %d", expectedStatusCode, result.StatusCode)
+	}
+}
