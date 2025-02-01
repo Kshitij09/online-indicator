@@ -32,6 +32,8 @@ func (s *Server) Run(port int) error {
 	router.HandleFunc("POST /ping", NewHttpHandler(ping, logger))
 	status := StatusHandler(s.Storage, s.config)
 	router.HandleFunc(fmt.Sprintf("GET /status/{%s}", PathId), NewHttpHandler(status, logger))
+	batchStatus := BatchStatusHandler(s.Storage, s.config)
+	router.HandleFunc("POST /batch/status", NewHttpHandler(batchStatus, logger))
 	server := &http.Server{
 		Addr:    listAddr,
 		Handler: router,
