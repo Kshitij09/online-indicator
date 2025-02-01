@@ -42,7 +42,7 @@ func (ctx *StatusService) Status(accountId string) (domain.ProfileStatus, error)
 	}
 	session, exists := ctx.session.GetByAccountId(profile.UserId)
 	if !exists {
-		return domain.EmptyProfileStatus, domain.ErrSessionNotFound
+		return domain.OfflineProfileStatus(profile), domain.ErrSessionNotFound
 	}
 	status, err := ctx.status.Get(session.AccountId)
 	if err != nil {

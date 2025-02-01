@@ -15,6 +15,16 @@ type ProfileStatus struct {
 
 var EmptyProfileStatus = ProfileStatus{}
 
+func OfflineProfileStatus(profile Profile) ProfileStatus {
+	return ProfileStatus{
+		Profile: profile,
+		Status: Status{
+			Id:       profile.UserId,
+			IsOnline: false,
+		},
+	}
+}
+
 type StatusDao interface {
 	UpdateOnline(id string, isOnline bool)
 	Get(id string) (Status, error)
