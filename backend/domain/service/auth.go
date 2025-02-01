@@ -30,7 +30,7 @@ func (s AuthService) CreateAccount(account domain.Account) (domain.Account, erro
 		return domain.EmptyAccount, err
 	}
 	profile := domain.Profile{
-		Id:       acc.Id,
+		UserId:   acc.Id,
 		Username: acc.Name,
 	}
 	err = s.profile.Create(profile)

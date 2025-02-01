@@ -3,7 +3,7 @@ package domain
 import "errors"
 
 type Profile struct {
-	Id       string
+	UserId   string
 	Username string
 }
 

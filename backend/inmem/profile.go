@@ -21,13 +21,13 @@ func NewProfileCache() domain.ProfileDao {
 func (ctx *ProfileCache) Create(profile domain.Profile) error {
 	ctx.mu.Lock()
 	defer ctx.mu.Unlock()
-	if _, exists := ctx.idLookup[profile.Id]; exists {
+	if _, exists := ctx.idLookup[profile.UserId]; exists {
 		return domain.ErrProfileAlreadyExists
 	}
 	if profile.Username == "" {
 		return domain.ErrEmptyName
 	}
-	ctx.idLookup[profile.Id] = &profile
+	ctx.idLookup[profile.UserId] = &profile
 	ctx.nameLookup[profile.Username] = &profile
 	return nil
 }

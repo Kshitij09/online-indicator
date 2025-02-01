@@ -40,7 +40,7 @@ func (ctx *StatusService) Status(accountId string) (domain.ProfileStatus, error)
 	if !exists {
 		return domain.EmptyProfileStatus, domain.ErrAccountNotFound
 	}
-	session, exists := ctx.session.GetByAccountId(profile.Id)
+	session, exists := ctx.session.GetByAccountId(profile.UserId)
 	if !exists {
 		return domain.EmptyProfileStatus, domain.ErrSessionNotFound
 	}
