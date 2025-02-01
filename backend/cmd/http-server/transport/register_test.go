@@ -22,7 +22,7 @@ func TestRegisterHandler_Success(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	staticGenerator := stubs.StaticGenerator{StubValue: "1"}
 	fakeClock := clockwork.NewFakeClock()
-	handler := registerHandler(staticGenerator, staticGenerator, fakeClock)
+	handler := registerHandler(staticGenerator, staticGenerator, fakeClock, staticGenerator)
 	handler(recorder, req)
 
 	result := recorder.Result()
@@ -48,7 +48,7 @@ func TestRegisterHandler_AccountExists(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	staticGenerator := stubs.StaticGenerator{StubValue: "1"}
 	fakeClock := clockwork.NewFakeClock()
-	storage := inmem.NewStorage(staticGenerator, staticGenerator, fakeClock)
+	storage := inmem.NewStorage(staticGenerator, staticGenerator, fakeClock, staticGenerator)
 	register := RegisterHandler(storage)
 	handler := NewHttpHandler(register)
 
@@ -87,7 +87,7 @@ func TestRegisterHandler_NameRequired(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	staticGenerator := stubs.StaticGenerator{StubValue: "1"}
 	fakeClock := clockwork.NewFakeClock()
-	handler := registerHandler(staticGenerator, staticGenerator, fakeClock)
+	handler := registerHandler(staticGenerator, staticGenerator, fakeClock, staticGenerator)
 
 	handler(recorder, req)
 
@@ -122,8 +122,13 @@ func createRegisterRequest(req RegisterRequest) (*http.Request, error) {
 	return httpReq, nil
 }
 
-func registerHandler(tokenGen domain.TokenGenerator, sessionGen domain.SessionGenerator, clock clockwork.Clock) http.HandlerFunc {
-	storage := inmem.NewStorage(tokenGen, sessionGen, clock)
+func registerHandler(
+	tokenGen domain.TokenGenerator,
+	sessionGen domain.SessionGenerator,
+	clock clockwork.Clock,
+	idGen domain.IDGenerator,
+) http.HandlerFunc {
+	storage := inmem.NewStorage(tokenGen, sessionGen, clock, idGen)
 	register := RegisterHandler(storage)
 	return NewHttpHandler(register)
 }

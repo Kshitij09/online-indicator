@@ -3,6 +3,7 @@ package transport
 import (
 	"github.com/Kshitij09/online-indicator/cmd/http-server/test"
 	"github.com/Kshitij09/online-indicator/domain"
+	"github.com/Kshitij09/online-indicator/domain/service"
 	"github.com/Kshitij09/online-indicator/domain/stubs"
 	"github.com/Kshitij09/online-indicator/inmem"
 	"github.com/jonboulle/clockwork"
@@ -14,8 +15,8 @@ import (
 func TestPingHandler_Unauthorized(t *testing.T) {
 	clock := clockwork.NewFakeClock()
 	staticGen := stubs.StaticGenerator{}
-	storage := inmem.NewStorage(staticGen, staticGen, clock)
-	handler := NewHttpHandler(PingHandler(storage))
+	storage := inmem.NewStorage(staticGen, staticGen, clock, staticGen)
+	handler := NewHttpHandler(PingHandler(storage, test.Config))
 
 	recorder := httptest.NewRecorder()
 
@@ -41,7 +42,7 @@ func TestPingHandler_OK(t *testing.T) {
 		StubValue: "123",
 	}
 	clock := clockwork.NewFakeClock()
-	storage := inmem.NewStorage(staticGen, staticGen, clock)
+	storage := inmem.NewStorage(staticGen, staticGen, clock, staticGen)
 	account := domain.Account{
 		Name: "John Doe",
 	}
@@ -49,13 +50,13 @@ func TestPingHandler_OK(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	loginService := domain.NewLoginService(storage.Auth(), storage.Session())
+	loginService := service.NewAuthService(storage.Auth(), storage.Session(), storage.Profile())
 	session, err := loginService.Login(account.Name, account.Token)
 	if err != nil {
 		t.Error(err)
 	}
 
-	handler := NewHttpHandler(PingHandler(storage))
+	handler := NewHttpHandler(PingHandler(storage, test.Config))
 	recorder := httptest.NewRecorder()
 
 	body := PingRequest{SessionId: session.Id}

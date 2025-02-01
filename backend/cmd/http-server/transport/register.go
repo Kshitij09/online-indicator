@@ -7,6 +7,7 @@ import (
 	"github.com/Kshitij09/online-indicator/cmd/http-server/transport/apierror"
 	"github.com/Kshitij09/online-indicator/cmd/http-server/transport/handlers"
 	"github.com/Kshitij09/online-indicator/domain"
+	service2 "github.com/Kshitij09/online-indicator/domain/service"
 	"net/http"
 )
 
@@ -19,6 +20,7 @@ type RegisterResponse struct {
 }
 
 func RegisterHandler(storage domain.Storage) handlers.Handler {
+	service := service2.NewAuthService(storage.Auth(), storage.Session(), storage.Profile())
 	return func(w http.ResponseWriter, r *http.Request) error {
 		if r.Body == http.NoBody {
 			return apierror.SimpleAPIError(http.StatusBadRequest, "Request Body is missing")
@@ -30,7 +32,7 @@ func RegisterHandler(storage domain.Storage) handlers.Handler {
 		}
 
 		acc := domain.Account{Name: req.Name}
-		created, err := storage.Auth().Create(acc)
+		created, err := service.CreateAccount(acc)
 		if errors.Is(err, domain.ErrAccountAlreadyExists) {
 			return apierror.SimpleAPIError(http.StatusConflict, "account already exists")
 		}

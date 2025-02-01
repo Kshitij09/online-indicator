@@ -22,7 +22,7 @@ func TestLoginHandler_Success(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	staticGenerator := stubs.StaticGenerator{StubValue: body.Token}
 	fakeClock := clockwork.NewFakeClock()
-	storage := inmem.NewStorage(staticGenerator, staticGenerator, fakeClock)
+	storage := inmem.NewStorage(staticGenerator, staticGenerator, fakeClock, staticGenerator)
 	handler := NewHttpHandler(LoginHandler(storage))
 
 	existing := domain.Account{Name: body.Name}
@@ -56,7 +56,7 @@ func TestLoginHandler_InvalidCredentials(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	staticGenerator := stubs.StaticGenerator{StubValue: "random"}
 	fakeClock := clockwork.NewFakeClock()
-	storage := inmem.NewStorage(staticGenerator, staticGenerator, fakeClock)
+	storage := inmem.NewStorage(staticGenerator, staticGenerator, fakeClock, staticGenerator)
 	handler := NewHttpHandler(LoginHandler(storage))
 
 	existing := domain.Account{Name: body.Name}
@@ -83,7 +83,7 @@ func TestLoginHandler_AccountNotFound(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	staticGenerator := stubs.StaticGenerator{StubValue: "1"}
 	fakeClock := clockwork.NewFakeClock()
-	handler := loginHandler(staticGenerator, staticGenerator, fakeClock)
+	handler := loginHandler(staticGenerator, staticGenerator, fakeClock, staticGenerator)
 
 	handler(recorder, req)
 
@@ -116,7 +116,7 @@ func TestLoginHandler_NameRequired(t *testing.T) {
 	recorder := httptest.NewRecorder()
 	staticGenerator := stubs.StaticGenerator{StubValue: "1"}
 	fakeClock := clockwork.NewFakeClock()
-	handler := loginHandler(staticGenerator, staticGenerator, fakeClock)
+	handler := loginHandler(staticGenerator, staticGenerator, fakeClock, staticGenerator)
 
 	handler(recorder, req)
 
@@ -151,8 +151,13 @@ func createLoginRequest(req LoginRequest) (*http.Request, error) {
 	return httpReq, nil
 }
 
-func loginHandler(tokenGen domain.TokenGenerator, sessionGen domain.SessionGenerator, clock clockwork.Clock) http.HandlerFunc {
-	storage := inmem.NewStorage(tokenGen, sessionGen, clock)
+func loginHandler(
+	tokenGen domain.TokenGenerator,
+	sessionGen domain.SessionGenerator,
+	clock clockwork.Clock,
+	idGen domain.IDGenerator,
+) http.HandlerFunc {
+	storage := inmem.NewStorage(tokenGen, sessionGen, clock, idGen)
 	register := LoginHandler(storage)
 	return NewHttpHandler(register)
 }

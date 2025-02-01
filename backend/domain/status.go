@@ -8,26 +8,25 @@ type Status struct {
 	LastOnline time.Time
 }
 
+type ProfileStatus struct {
+	Profile
+	Status
+}
+
+var EmptyProfileStatus = ProfileStatus{}
+
+func OfflineProfileStatus(profile Profile) ProfileStatus {
+	return ProfileStatus{
+		Profile: profile,
+		Status: Status{
+			Id:       profile.UserId,
+			IsOnline: false,
+		},
+	}
+}
+
 type StatusDao interface {
 	UpdateOnline(id string, isOnline bool)
-	IsOnline(id string) (bool, error)
-	FetchAll(ids []string) []Status
-}
-
-type StatusService struct {
-	status  StatusDao
-	session SessionDao
-}
-
-func NewStatusService(status StatusDao, session SessionDao) StatusService {
-	return StatusService{status: status, session: session}
-}
-
-func (ctx *StatusService) Ping(sessionId string) error {
-	session, exists := ctx.session.Get(sessionId)
-	if !exists {
-		return ErrSessionNotFound
-	}
-	ctx.status.UpdateOnline(session.Id, true)
-	return nil
+	Get(id string) (Status, error)
+	BatchGet(ids []string) map[string]Status
 }

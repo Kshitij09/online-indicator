@@ -7,6 +7,7 @@ import (
 	"github.com/Kshitij09/online-indicator/cmd/http-server/transport/apierror"
 	"github.com/Kshitij09/online-indicator/cmd/http-server/transport/handlers"
 	"github.com/Kshitij09/online-indicator/domain"
+	service2 "github.com/Kshitij09/online-indicator/domain/service"
 	"net/http"
 )
 
@@ -14,8 +15,8 @@ type PingRequest struct {
 	SessionId string `json:"sessionId"`
 }
 
-func PingHandler(storage domain.Storage) handlers.Handler {
-	service := domain.NewStatusService(storage.Status(), storage.Session())
+func PingHandler(storage domain.Storage, config domain.Config) handlers.Handler {
+	service := service2.NewStatusService(storage.Status(), storage.Session(), config.OnlineThreshold, storage.Profile())
 	return func(w http.ResponseWriter, r *http.Request) error {
 		var req PingRequest
 		decodeErr := json.NewDecoder(r.Body).Decode(&req)

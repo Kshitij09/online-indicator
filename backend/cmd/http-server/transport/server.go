@@ -10,11 +10,13 @@ import (
 
 type Server struct {
 	domain.Storage
+	config domain.Config
 }
 
-func NewServer(storage domain.Storage) *Server {
+func NewServer(storage domain.Storage, config domain.Config) *Server {
 	return &Server{
 		Storage: storage,
+		config:  config,
 	}
 }
 func (s *Server) Run(port int) error {
@@ -26,8 +28,12 @@ func (s *Server) Run(port int) error {
 	router.HandleFunc("POST /register", NewHttpHandler(register, logger))
 	login := LoginHandler(s.Storage)
 	router.HandleFunc("POST /login", NewHttpHandler(login, logger))
-	ping := PingHandler(s.Storage)
+	ping := PingHandler(s.Storage, s.config)
 	router.HandleFunc("POST /ping", NewHttpHandler(ping, logger))
+	status := StatusHandler(s.Storage, s.config)
+	router.HandleFunc(fmt.Sprintf("GET /status/{%s}", PathId), NewHttpHandler(status, logger))
+	batchStatus := BatchStatusHandler(s.Storage, s.config)
+	router.HandleFunc("POST /batch/status", NewHttpHandler(batchStatus, logger))
 	server := &http.Server{
 		Addr:    listAddr,
 		Handler: router,

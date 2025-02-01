@@ -6,7 +6,12 @@ import (
 	"github.com/Kshitij09/online-indicator/domain"
 	"github.com/Kshitij09/online-indicator/inmem"
 	"github.com/jonboulle/clockwork"
+	"time"
 )
+
+var DefaultConfig = domain.Config{
+	OnlineThreshold: 10 * time.Second,
+}
 
 func main() {
 	portUsage := "port to listen on"
@@ -17,8 +22,9 @@ func main() {
 	tokenGen := domain.NewUUIDTokenGenerator()
 	sessionGen := domain.NewUUIDSessionGenerator()
 	realClock := clockwork.NewRealClock()
-	storage := inmem.NewStorage(tokenGen, sessionGen, realClock)
-	server := transport.NewServer(storage)
+	idGen := domain.NewSeqIdGenerator()
+	storage := inmem.NewStorage(tokenGen, sessionGen, realClock, idGen)
+	server := transport.NewServer(storage, DefaultConfig)
 	err := server.Run(*port)
 	if err != nil {
 		panic(err)
