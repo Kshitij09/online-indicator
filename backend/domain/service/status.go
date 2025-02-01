@@ -54,3 +54,20 @@ func (ctx *StatusService) Status(accountId string) (domain.ProfileStatus, error)
 	}
 	return profileStatus, nil
 }
+
+func (ctx *StatusService) BatchStatus(ids []string) map[string]domain.ProfileStatus {
+	profiles := ctx.profile.BatchGetByUserId(ids)
+	statuses := ctx.status.BatchGet(ids)
+	merged := make(map[string]domain.ProfileStatus)
+	for userId, profile := range profiles {
+		status, exists := statuses[userId]
+		if exists {
+			profileStatus := domain.ProfileStatus{
+				Profile: profile,
+				Status:  status,
+			}
+			merged[userId] = profileStatus
+		}
+	}
+	return merged
+}

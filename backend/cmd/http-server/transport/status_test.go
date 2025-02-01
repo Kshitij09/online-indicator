@@ -2,6 +2,7 @@ package transport
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/Kshitij09/online-indicator/cmd/http-server/test"
 	"github.com/Kshitij09/online-indicator/domain"
 	"github.com/Kshitij09/online-indicator/domain/service"
@@ -11,6 +12,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"reflect"
+	"slices"
+	"strconv"
 	"testing"
 )
 
@@ -145,4 +148,79 @@ func TestStatusHandler_MissingAccountId(t *testing.T) {
 	if result.StatusCode != expectedStatusCode {
 		t.Errorf("status code should be %d, got %d", expectedStatusCode, result.StatusCode)
 	}
+}
+
+func TestBatchStatusHandler_Success(t *testing.T) {
+	seqGen := domain.NewSeqIdGenerator()
+	staticGen := stubs.StaticGenerator{StubValue: "123"}
+	clock := clockwork.NewFakeClock()
+	storage := inmem.NewStorage(staticGen, staticGen, clock, seqGen)
+	authService := service.NewAuthService(storage.Auth(), storage.Session(), storage.Profile())
+	accIds := make([]string, 0, 100)
+	expected := make([]StatusResponse, 0, 100)
+	for i := 0; i < 100; i++ {
+		name := fmt.Sprintf("test%d", i)
+		acc := domain.Account{Name: name}
+		acc, err := authService.CreateAccount(acc)
+		if err != nil {
+			t.Error(err)
+		}
+		accIds = append(accIds, acc.Id)
+		session, err := authService.Login(acc.Name, acc.Token)
+		if err != nil {
+			t.Error(err)
+		}
+		statusService := service.NewStatusService(storage.Status(), storage.Session(), test.Config.OnlineThreshold, storage.Profile())
+		err = statusService.Ping(session.Id)
+		if err != nil {
+			t.Error(err)
+		}
+		lastOnlineMillis := clock.Now().UnixMilli()
+		response := StatusResponse{
+			Id:         acc.Id,
+			Username:   acc.Name,
+			IsOnline:   true,
+			LastOnline: &lastOnlineMillis,
+		}
+		expected = append(expected, response)
+	}
+
+	handler := NewHttpHandler(BatchStatusHandler(storage, test.Config))
+
+	reqBody := BatchStatusRequest{Ids: accIds}
+	req, err := test.CreateRequest(http.MethodPost, "/batch-status", reqBody)
+	if err != nil {
+		t.Error(err)
+	}
+	recorder := httptest.NewRecorder()
+	handler(recorder, req)
+
+	result := recorder.Result()
+	expectedStatusCode := http.StatusOK
+	if result.StatusCode != expectedStatusCode {
+		t.Errorf("status code should be %d, got %d", expectedStatusCode, result.StatusCode)
+	}
+
+	var body BatchStatusResponse
+	err = json.NewDecoder(result.Body).Decode(&body)
+	if err != nil {
+		t.Error(err)
+	}
+	slices.SortFunc(expected, statusResponseLessById)
+	actual := body.Items
+	slices.SortFunc(actual, statusResponseLessById)
+	if !reflect.DeepEqual(actual, expected) {
+		t.Error("Response body does not match")
+	}
+}
+
+func statusResponseLessById(first StatusResponse, second StatusResponse) int {
+	aId, _ := strconv.Atoi(first.Id)
+	bId, _ := strconv.Atoi(second.Id)
+	if aId < bId {
+		return -1
+	} else if aId > bId {
+		return 1
+	}
+	return 0
 }
