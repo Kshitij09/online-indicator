@@ -14,4 +14,5 @@ type ProfileDao interface {
 	Create(Profile) error
 	UsernameExists(string) bool
 	GetByUserId(string) (Profile, bool)
+	BatchGetByUserId([]string) map[string]Profile
 }

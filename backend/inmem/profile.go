@@ -49,3 +49,16 @@ func (ctx *ProfileCache) GetByUserId(id string) (domain.Profile, bool) {
 		return domain.EmptyProfile, false
 	}
 }
+
+func (ctx *ProfileCache) BatchGetByUserId(ids []string) map[string]domain.Profile {
+	result := make(map[string]domain.Profile)
+	ctx.mu.RLock()
+	defer ctx.mu.RUnlock()
+	for _, id := range ids {
+		profile, exists := ctx.idLookup[id]
+		if exists {
+			result[id] = *profile
+		}
+	}
+	return result
+}

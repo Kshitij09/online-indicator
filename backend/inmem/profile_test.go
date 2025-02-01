@@ -3,7 +3,10 @@ package inmem
 import (
 	"errors"
 	"github.com/Kshitij09/online-indicator/domain"
+	"maps"
 	"reflect"
+	"slices"
+	"strconv"
 	"testing"
 )
 
@@ -48,5 +51,24 @@ func TestProfileCache_UsernameExists(t *testing.T) {
 	}
 	if cache.UsernameExists(expected.Username) != true {
 		t.Errorf("Profile should exist after creation")
+	}
+}
+
+func TestProfileCache_BatchGetByUserId(t *testing.T) {
+	cache := NewProfileCache()
+	expected := make(map[string]domain.Profile)
+	for i := 0; i < 50; i++ {
+		userId := strconv.Itoa(i)
+		userName := "test" + userId
+		profile := domain.Profile{UserId: userId, Username: userName}
+		expected[userId] = profile
+		err := cache.Create(profile)
+		if err != nil {
+			t.Error(err)
+		}
+	}
+	actual := cache.BatchGetByUserId(slices.Collect(maps.Keys(expected)))
+	if !reflect.DeepEqual(actual, expected) {
+		t.Errorf("Created and Received profiles are different")
 	}
 }
