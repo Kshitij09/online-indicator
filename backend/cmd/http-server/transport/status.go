@@ -11,7 +11,7 @@ import (
 	"net/http"
 )
 
-var PathAccountId = "id"
+var PathId = "id"
 
 type StatusResponse struct {
 	Id         string `json:"id"`
@@ -28,9 +28,9 @@ func StatusHandler(storage domain.Storage, config domain.Config) handlers.Handle
 		storage.Profile(),
 	)
 	return func(w http.ResponseWriter, r *http.Request) error {
-		accountId := r.PathValue(PathAccountId)
+		accountId := r.PathValue(PathId)
 		if accountId == "" {
-			return apierror.SimpleAPIError(http.StatusBadRequest, fmt.Sprintf("path parameter '%s' missing", PathAccountId))
+			return apierror.SimpleAPIError(http.StatusBadRequest, fmt.Sprintf("path parameter '%s' missing", PathId))
 		}
 		profileStatus, err := service.Status(accountId)
 		if errors.Is(err, domain.ErrAccountNotFound) {
