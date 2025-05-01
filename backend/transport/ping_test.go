@@ -1,10 +1,10 @@
 package transport
 
 import (
-	"github.com/Kshitij09/online-indicator/cmd/http-server/test"
 	"github.com/Kshitij09/online-indicator/domain"
 	"github.com/Kshitij09/online-indicator/domain/stubs"
 	"github.com/Kshitij09/online-indicator/inmem"
+	"github.com/Kshitij09/online-indicator/test"
 	"github.com/jonboulle/clockwork"
 	"net/http"
 	"net/http/httptest"

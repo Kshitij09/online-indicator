@@ -2,8 +2,8 @@ package transport
 
 import (
 	"fmt"
-	"github.com/Kshitij09/online-indicator/cmd/http-server/transport/middlewares"
 	"github.com/Kshitij09/online-indicator/domain"
+	"github.com/Kshitij09/online-indicator/transport/middlewares"
 	"log"
 	"net/http"
 )
