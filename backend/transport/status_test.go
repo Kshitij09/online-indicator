@@ -299,6 +299,81 @@ func TestStatusHandler_OnlineToOfflineAfterThreshold(t *testing.T) {
 	}
 }
 
+func TestStatusHandler_OfflineToOnline(t *testing.T) {
+	staticGen := stubs.StaticGenerator{StubValue: "123"}
+	clock := clockwork.NewFakeClock()
+	storage := inmem.NewStorage(staticGen, staticGen, clock, staticGen)
+	authService := service.NewAuthService(storage.Auth(), storage.Session(), storage.Profile())
+
+	// Register
+	acc := domain.Account{Name: "john"}
+	acc, err := authService.CreateAccount(acc)
+	if err != nil {
+		t.Error(err)
+	}
+
+	// Login
+	session, err := authService.Login(acc.Id, acc.Token)
+	if err != nil {
+		t.Error(err)
+	}
+
+	// Advance time beyond initial ping by logic
+	clock.Advance(testfixtures.Config.OnlineThreshold + 1)
+
+	handler := NewHttpHandler(StatusHandler(storage, testfixtures.Config, clock))
+
+	// Verify offline status
+	req, err := http.NewRequest(http.MethodGet, "/status", nil)
+	if err != nil {
+		t.Error(err)
+	}
+	req.SetPathValue("id", acc.Id)
+	recorder := httptest.NewRecorder()
+	handler(recorder, req)
+
+	result := recorder.Result()
+	var body StatusResponse
+	err = json.NewDecoder(result.Body).Decode(&body)
+	if err != nil {
+		t.Error(err)
+	}
+	if body.IsOnline {
+		t.Error("user should be offline")
+	}
+
+	// Ping to set online
+	statusService := service.NewStatusService(
+		storage.Session(),
+		testfixtures.Config.OnlineThreshold,
+		storage.Profile(),
+		clock,
+	)
+	err = statusService.Ping(session.Id)
+	if err != nil {
+		t.Error(err)
+	}
+
+	// Verify online status
+	req, err = http.NewRequest(http.MethodGet, "/status", nil)
+	if err != nil {
+		t.Error(err)
+	}
+	req.SetPathValue("id", acc.Id)
+	recorder = httptest.NewRecorder()
+	handler(recorder, req)
+
+	result = recorder.Result()
+	body = StatusResponse{}
+	err = json.NewDecoder(result.Body).Decode(&body)
+	if err != nil {
+		t.Error(err)
+	}
+	if !body.IsOnline {
+		t.Error("user should be online")
+	}
+}
+
 func statusResponseLessById(first StatusResponse, second StatusResponse) int {
 	aId, _ := strconv.Atoi(first.Id)
 	bId, _ := strconv.Atoi(second.Id)
