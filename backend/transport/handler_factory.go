@@ -2,10 +2,10 @@ package transport
 
 import (
 	"errors"
-	"github.com/Kshitij09/online-indicator/cmd/http-server/transport/apierror"
-	"github.com/Kshitij09/online-indicator/cmd/http-server/transport/handlers"
-	"github.com/Kshitij09/online-indicator/cmd/http-server/transport/middlewares"
-	"github.com/Kshitij09/online-indicator/cmd/http-server/transport/writer"
+	"github.com/Kshitij09/online-indicator/transport/apierror"
+	"github.com/Kshitij09/online-indicator/transport/handlers"
+	"github.com/Kshitij09/online-indicator/transport/middlewares"
+	"github.com/Kshitij09/online-indicator/transport/writer"
 	"log"
 	"net/http"
 )

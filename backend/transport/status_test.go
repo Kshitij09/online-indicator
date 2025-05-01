@@ -3,11 +3,11 @@ package transport
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/Kshitij09/online-indicator/cmd/http-server/test"
 	"github.com/Kshitij09/online-indicator/domain"
 	"github.com/Kshitij09/online-indicator/domain/service"
 	"github.com/Kshitij09/online-indicator/domain/stubs"
 	"github.com/Kshitij09/online-indicator/inmem"
+	test2 "github.com/Kshitij09/online-indicator/test"
 	"github.com/jonboulle/clockwork"
 	"net/http"
 	"net/http/httptest"
@@ -31,13 +31,13 @@ func TestStatusHandler_Success(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	statusService := service.NewStatusService(storage.Status(), storage.Session(), test.Config.OnlineThreshold, storage.Profile())
+	statusService := service.NewStatusService(storage.Status(), storage.Session(), test2.Config.OnlineThreshold, storage.Profile())
 	err = statusService.Ping(session.Id)
 	if err != nil {
 		t.Error(err)
 	}
 
-	handler := NewHttpHandler(StatusHandler(storage, test.Config))
+	handler := NewHttpHandler(StatusHandler(storage, test2.Config))
 
 	req, err := http.NewRequest(http.MethodGet, "/status", nil)
 	if err != nil {
@@ -75,7 +75,7 @@ func TestStatusHandler_AccountNotFound(t *testing.T) {
 	staticGen := stubs.StaticGenerator{StubValue: "123"}
 	clock := clockwork.NewFakeClock()
 	storage := inmem.NewStorage(staticGen, staticGen, clock, staticGen)
-	handler := NewHttpHandler(StatusHandler(storage, test.Config))
+	handler := NewHttpHandler(StatusHandler(storage, test2.Config))
 
 	req, err := http.NewRequest(http.MethodGet, "/status", nil)
 	if err != nil {
@@ -102,7 +102,7 @@ func TestStatusHandler_NoLoginAsOffline(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	handler := NewHttpHandler(StatusHandler(storage, test.Config))
+	handler := NewHttpHandler(StatusHandler(storage, test2.Config))
 
 	req, err := http.NewRequest(http.MethodGet, "/status", nil)
 	if err != nil {
@@ -134,7 +134,7 @@ func TestStatusHandler_MissingAccountId(t *testing.T) {
 	staticGen := stubs.StaticGenerator{StubValue: "123"}
 	clock := clockwork.NewFakeClock()
 	storage := inmem.NewStorage(staticGen, staticGen, clock, staticGen)
-	handler := NewHttpHandler(StatusHandler(storage, test.Config))
+	handler := NewHttpHandler(StatusHandler(storage, test2.Config))
 
 	req, err := http.NewRequest(http.MethodGet, "/status", nil)
 	if err != nil {
@@ -170,7 +170,7 @@ func TestBatchStatusHandler_Success(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		statusService := service.NewStatusService(storage.Status(), storage.Session(), test.Config.OnlineThreshold, storage.Profile())
+		statusService := service.NewStatusService(storage.Status(), storage.Session(), test2.Config.OnlineThreshold, storage.Profile())
 		err = statusService.Ping(session.Id)
 		if err != nil {
 			t.Error(err)
@@ -185,10 +185,10 @@ func TestBatchStatusHandler_Success(t *testing.T) {
 		expected = append(expected, response)
 	}
 
-	handler := NewHttpHandler(BatchStatusHandler(storage, test.Config))
+	handler := NewHttpHandler(BatchStatusHandler(storage, test2.Config))
 
 	reqBody := BatchStatusRequest{Ids: accIds}
-	req, err := test.CreateRequest(http.MethodPost, "/batch-status", reqBody)
+	req, err := test2.CreateRequest(http.MethodPost, "/batch-status", reqBody)
 	if err != nil {
 		t.Error(err)
 	}
