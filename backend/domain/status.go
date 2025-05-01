@@ -10,18 +10,17 @@ type Status struct {
 
 type ProfileStatus struct {
 	Profile
-	Status
+	IsOnline   bool
+	LastOnline time.Time
 }
 
 var EmptyProfileStatus = ProfileStatus{}
 
-func OfflineProfileStatus(profile Profile) ProfileStatus {
+func OfflineProfileStatus(profile Profile, lastOnline time.Time) ProfileStatus {
 	return ProfileStatus{
-		Profile: profile,
-		Status: Status{
-			Id:       profile.UserId,
-			IsOnline: false,
-		},
+		Profile:    profile,
+		IsOnline:   false,
+		LastOnline: lastOnline,
 	}
 }
 

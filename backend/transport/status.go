@@ -8,6 +8,7 @@ import (
 	service2 "github.com/Kshitij09/online-indicator/domain/service"
 	"github.com/Kshitij09/online-indicator/transport/apierror"
 	"github.com/Kshitij09/online-indicator/transport/handlers"
+	"github.com/jonboulle/clockwork"
 	"net/http"
 )
 
@@ -27,12 +28,13 @@ type BatchStatusResponse struct {
 	Items []StatusResponse `json:"items"`
 }
 
-func StatusHandler(storage domain.Storage, config domain.Config) handlers.Handler {
+func StatusHandler(storage domain.Storage, config domain.Config, clock clockwork.Clock) handlers.Handler {
 	service := service2.NewStatusService(
 		storage.Status(),
 		storage.Session(),
 		config.OnlineThreshold,
 		storage.Profile(),
+		clock,
 	)
 	return func(w http.ResponseWriter, r *http.Request) error {
 		accountId := r.PathValue(PathId)
@@ -48,8 +50,14 @@ func StatusHandler(storage domain.Storage, config domain.Config) handlers.Handle
 	}
 }
 
-func BatchStatusHandler(storage domain.Storage, config domain.Config) handlers.Handler {
-	service := service2.NewStatusService(storage.Status(), storage.Session(), config.OnlineThreshold, storage.Profile())
+func BatchStatusHandler(storage domain.Storage, config domain.Config, clock clockwork.Clock) handlers.Handler {
+	service := service2.NewStatusService(
+		storage.Status(),
+		storage.Session(),
+		config.OnlineThreshold,
+		storage.Profile(),
+		clock,
+	)
 	return func(w http.ResponseWriter, r *http.Request) error {
 		request := BatchStatusRequest{}
 		err := json.NewDecoder(r.Body).Decode(&request)

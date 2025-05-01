@@ -31,13 +31,19 @@ func TestStatusHandler_Success(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	statusService := service.NewStatusService(storage.Status(), storage.Session(), testfixtures.Config.OnlineThreshold, storage.Profile())
+	statusService := service.NewStatusService(
+		storage.Status(),
+		storage.Session(),
+		testfixtures.Config.OnlineThreshold,
+		storage.Profile(),
+		clock,
+	)
 	err = statusService.Ping(session.Id)
 	if err != nil {
 		t.Error(err)
 	}
 
-	handler := NewHttpHandler(StatusHandler(storage, testfixtures.Config))
+	handler := NewHttpHandler(StatusHandler(storage, testfixtures.Config, clock))
 
 	req, err := http.NewRequest(http.MethodGet, "/status", nil)
 	if err != nil {
@@ -75,7 +81,7 @@ func TestStatusHandler_AccountNotFound(t *testing.T) {
 	staticGen := stubs.StaticGenerator{StubValue: "123"}
 	clock := clockwork.NewFakeClock()
 	storage := inmem.NewStorage(staticGen, staticGen, clock, staticGen)
-	handler := NewHttpHandler(StatusHandler(storage, testfixtures.Config))
+	handler := NewHttpHandler(StatusHandler(storage, testfixtures.Config, clock))
 
 	req, err := http.NewRequest(http.MethodGet, "/status", nil)
 	if err != nil {
@@ -102,7 +108,7 @@ func TestStatusHandler_NoLoginAsOffline(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	handler := NewHttpHandler(StatusHandler(storage, testfixtures.Config))
+	handler := NewHttpHandler(StatusHandler(storage, testfixtures.Config, clock))
 
 	req, err := http.NewRequest(http.MethodGet, "/status", nil)
 	if err != nil {
@@ -134,7 +140,7 @@ func TestStatusHandler_MissingAccountId(t *testing.T) {
 	staticGen := stubs.StaticGenerator{StubValue: "123"}
 	clock := clockwork.NewFakeClock()
 	storage := inmem.NewStorage(staticGen, staticGen, clock, staticGen)
-	handler := NewHttpHandler(StatusHandler(storage, testfixtures.Config))
+	handler := NewHttpHandler(StatusHandler(storage, testfixtures.Config, clock))
 
 	req, err := http.NewRequest(http.MethodGet, "/status", nil)
 	if err != nil {
@@ -170,7 +176,13 @@ func TestBatchStatusHandler_Success(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		statusService := service.NewStatusService(storage.Status(), storage.Session(), testfixtures.Config.OnlineThreshold, storage.Profile())
+		statusService := service.NewStatusService(
+			storage.Status(),
+			storage.Session(),
+			testfixtures.Config.OnlineThreshold,
+			storage.Profile(),
+			clock,
+		)
 		err = statusService.Ping(session.Id)
 		if err != nil {
 			t.Error(err)
@@ -185,7 +197,7 @@ func TestBatchStatusHandler_Success(t *testing.T) {
 		expected = append(expected, response)
 	}
 
-	handler := NewHttpHandler(BatchStatusHandler(storage, testfixtures.Config))
+	handler := NewHttpHandler(BatchStatusHandler(storage, testfixtures.Config, clock))
 
 	reqBody := BatchStatusRequest{Ids: accIds}
 	req, err := testfixtures.CreateRequest(http.MethodPost, "/batch-status", reqBody)
