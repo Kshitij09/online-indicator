@@ -24,7 +24,7 @@ func main() {
 	realClock := clockwork.NewRealClock()
 	idGen := domain.NewSeqIdGenerator()
 	storage := inmem.NewStorage(tokenGen, sessionGen, realClock, idGen)
-	server := transport.NewServer(storage, DefaultConfig)
+	server := transport.NewServer(storage, DefaultConfig, realClock)
 	err := server.Run(*port)
 	if err != nil {
 		panic(err)

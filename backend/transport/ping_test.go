@@ -16,7 +16,7 @@ func TestPingHandler_Unauthorized(t *testing.T) {
 	clock := clockwork.NewFakeClock()
 	staticGen := stubs.StaticGenerator{}
 	storage := inmem.NewStorage(staticGen, staticGen, clock, staticGen)
-	handler := NewHttpHandler(PingHandler(storage, testfixtures.Config))
+	handler := NewHttpHandler(PingHandler(storage, testfixtures.Config, clock))
 
 	recorder := httptest.NewRecorder()
 
@@ -56,7 +56,7 @@ func TestPingHandler_OK(t *testing.T) {
 		t.Error(err)
 	}
 
-	handler := NewHttpHandler(PingHandler(storage, testfixtures.Config))
+	handler := NewHttpHandler(PingHandler(storage, testfixtures.Config, clock))
 	recorder := httptest.NewRecorder()
 
 	body := PingRequest{SessionId: session.Id}

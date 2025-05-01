@@ -1,6 +1,6 @@
 # Online indicator
 
-## v0 requirements
+## v0 requirements (✅ Done)
 
 * Self-contained, in-memory server
 * `POST /register` endpoint to add new account. It should accept `name` in the request body 

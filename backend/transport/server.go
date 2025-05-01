@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/Kshitij09/online-indicator/domain"
 	"github.com/Kshitij09/online-indicator/transport/middlewares"
+	"github.com/jonboulle/clockwork"
 	"log"
 	"net/http"
 )
@@ -11,12 +12,14 @@ import (
 type Server struct {
 	domain.Storage
 	config domain.Config
+	clock  clockwork.Clock
 }
 
-func NewServer(storage domain.Storage, config domain.Config) *Server {
+func NewServer(storage domain.Storage, config domain.Config, clock clockwork.Clock) *Server {
 	return &Server{
 		Storage: storage,
 		config:  config,
+		clock:   clock,
 	}
 }
 func (s *Server) Run(port int) error {
@@ -28,11 +31,11 @@ func (s *Server) Run(port int) error {
 	router.HandleFunc("POST /register", NewHttpHandler(register, logger))
 	login := LoginHandler(s.Storage)
 	router.HandleFunc("POST /login", NewHttpHandler(login, logger))
-	ping := PingHandler(s.Storage, s.config)
+	ping := PingHandler(s.Storage, s.config, s.clock)
 	router.HandleFunc("POST /ping", NewHttpHandler(ping, logger))
-	status := StatusHandler(s.Storage, s.config)
+	status := StatusHandler(s.Storage, s.config, s.clock)
 	router.HandleFunc(fmt.Sprintf("GET /status/{%s}", PathId), NewHttpHandler(status, logger))
-	batchStatus := BatchStatusHandler(s.Storage, s.config)
+	batchStatus := BatchStatusHandler(s.Storage, s.config, s.clock)
 	router.HandleFunc("POST /batch/status", NewHttpHandler(batchStatus, logger))
 	server := &http.Server{
 		Addr:    listAddr,
