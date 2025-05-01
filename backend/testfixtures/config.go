@@ -1,4 +1,4 @@
-package test
+package testfixtures
 
 import (
 	"github.com/Kshitij09/online-indicator/domain"
