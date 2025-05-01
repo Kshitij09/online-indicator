@@ -18,7 +18,6 @@ type PingRequest struct {
 
 func PingHandler(storage domain.Storage, config domain.Config, clock clockwork.Clock) handlers.Handler {
 	service := service2.NewStatusService(
-		storage.Status(),
 		storage.Session(),
 		config.OnlineThreshold,
 		storage.Profile(),

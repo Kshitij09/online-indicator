@@ -7,7 +7,6 @@ import (
 )
 
 type StatusService struct {
-	status          domain.StatusDao
 	session         domain.SessionDao
 	profile         domain.ProfileDao
 	onlineThreshold time.Duration
@@ -15,14 +14,12 @@ type StatusService struct {
 }
 
 func NewStatusService(
-	status domain.StatusDao,
 	session domain.SessionDao,
 	onlineThreshold time.Duration,
 	profile domain.ProfileDao,
 	clock clockwork.Clock,
 ) StatusService {
 	return StatusService{
-		status:          status,
 		session:         session,
 		onlineThreshold: onlineThreshold,
 		profile:         profile,

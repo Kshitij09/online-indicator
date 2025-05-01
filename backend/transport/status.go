@@ -30,7 +30,6 @@ type BatchStatusResponse struct {
 
 func StatusHandler(storage domain.Storage, config domain.Config, clock clockwork.Clock) handlers.Handler {
 	service := service2.NewStatusService(
-		storage.Status(),
 		storage.Session(),
 		config.OnlineThreshold,
 		storage.Profile(),
@@ -52,7 +51,6 @@ func StatusHandler(storage domain.Storage, config domain.Config, clock clockwork
 
 func BatchStatusHandler(storage domain.Storage, config domain.Config, clock clockwork.Clock) handlers.Handler {
 	service := service2.NewStatusService(
-		storage.Status(),
 		storage.Session(),
 		config.OnlineThreshold,
 		storage.Profile(),

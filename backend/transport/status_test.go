@@ -32,7 +32,6 @@ func TestStatusHandler_Success(t *testing.T) {
 		t.Error(err)
 	}
 	statusService := service.NewStatusService(
-		storage.Status(),
 		storage.Session(),
 		testfixtures.Config.OnlineThreshold,
 		storage.Profile(),
@@ -177,7 +176,6 @@ func TestBatchStatusHandler_Success(t *testing.T) {
 			t.Error(err)
 		}
 		statusService := service.NewStatusService(
-			storage.Status(),
 			storage.Session(),
 			testfixtures.Config.OnlineThreshold,
 			storage.Profile(),
