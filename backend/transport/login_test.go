@@ -14,18 +14,19 @@ import (
 )
 
 func TestLoginHandler_Success(t *testing.T) {
-	body := LoginRequest{Name: "test", Token: "123"}
+	body := LoginRequest{Id: "1", Token: "123"}
 	req, err := createLoginRequest(body)
 	if err != nil {
 		t.Error(err)
 	}
 	recorder := httptest.NewRecorder()
 	staticGenerator := stubs.StaticGenerator{StubValue: body.Token}
+	idGenerator := stubs.StaticGenerator{StubValue: body.Id}
 	fakeClock := clockwork.NewFakeClock()
-	storage := inmem.NewStorage(staticGenerator, staticGenerator, fakeClock, staticGenerator)
+	storage := inmem.NewStorage(staticGenerator, staticGenerator, fakeClock, idGenerator)
 	handler := NewHttpHandler(LoginHandler(storage))
 
-	existing := domain.Account{Name: body.Name}
+	existing := domain.Account{Name: body.Id}
 	_, err = storage.Auth().Create(existing)
 	if err != nil {
 		t.Error(err)
@@ -48,18 +49,19 @@ func TestLoginHandler_Success(t *testing.T) {
 }
 
 func TestLoginHandler_InvalidCredentials(t *testing.T) {
-	body := LoginRequest{Name: "test", Token: "123"}
+	body := LoginRequest{Id: "1", Token: "123"}
 	req, err := createLoginRequest(body)
 	if err != nil {
 		t.Error(err)
 	}
 	recorder := httptest.NewRecorder()
-	staticGenerator := stubs.StaticGenerator{StubValue: "random"}
+	staticGenerator := stubs.StaticGenerator{StubValue: "random"} // token not matching
+	idGenerator := stubs.StaticGenerator{StubValue: body.Id}
 	fakeClock := clockwork.NewFakeClock()
-	storage := inmem.NewStorage(staticGenerator, staticGenerator, fakeClock, staticGenerator)
+	storage := inmem.NewStorage(staticGenerator, staticGenerator, fakeClock, idGenerator)
 	handler := NewHttpHandler(LoginHandler(storage))
 
-	existing := domain.Account{Name: body.Name}
+	existing := domain.Account{Name: "John Doe"}
 	_, err = storage.Auth().Create(existing)
 	if err != nil {
 		t.Error(err)
@@ -75,7 +77,7 @@ func TestLoginHandler_InvalidCredentials(t *testing.T) {
 }
 
 func TestLoginHandler_AccountNotFound(t *testing.T) {
-	body := LoginRequest{Name: "test"}
+	body := LoginRequest{Id: "test"}
 	req, err := createLoginRequest(body)
 	if err != nil {
 		t.Error(err)
@@ -107,7 +109,7 @@ func TestLoginHandler_AccountNotFound(t *testing.T) {
 	}
 }
 
-func TestLoginHandler_NameRequired(t *testing.T) {
+func TestLoginHandler_IdRequired(t *testing.T) {
 	body := LoginRequest{}
 	req, err := createLoginRequest(body)
 	if err != nil {
@@ -134,7 +136,7 @@ func TestLoginHandler_NameRequired(t *testing.T) {
 		t.Errorf("invalid status code in the response body: expected %d, got %d", expectedStatusCode, resp.StatusCode)
 	}
 	errMsg := resp.Errors[0]["msg"]
-	expected := "name is required"
+	expected := "id is required"
 	if errMsg != expected {
 		t.Errorf("invalid error message: expected %s, got %s", expected, errMsg)
 	}
@@ -146,7 +148,7 @@ func createLoginRequest(req LoginRequest) (*http.Request, error) {
 		return nil, nil
 	}
 	body := bytes.NewBuffer(serialized)
-	httpReq := httptest.NewRequest(http.MethodPost, "/register", body)
+	httpReq := httptest.NewRequest(http.MethodPost, "/login", body)
 	httpReq.Header.Set("Content-Type", "application/json")
 	return httpReq, nil
 }

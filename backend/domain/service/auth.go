@@ -16,8 +16,8 @@ func NewAuthService(auth domain.AuthDao, session domain.SessionDao, profile doma
 	}
 }
 
-func (s AuthService) Login(name string, token string) (domain.Session, error) {
-	acc, err := s.auth.Login(name, token)
+func (s AuthService) Login(id string, token string) (domain.Session, error) {
+	acc, err := s.auth.Login(id, token)
 	if err != nil {
 		return domain.Session{}, err
 	}

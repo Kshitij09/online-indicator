@@ -58,11 +58,11 @@ func TestAuthCache_Get(t *testing.T) {
 	if err == nil {
 		t.Errorf("expected %v initially, got nil", domain.ErrAccountNotFound)
 	}
-	_, err = cache.Create(acc)
+	created, err := cache.Create(acc)
 	if err != nil {
 		t.Error(err)
 	}
-	acc, err = cache.Login(acc.Name, tokenGen.StubValue)
+	acc, err = cache.Login(created.Id, tokenGen.StubValue)
 	if err != nil {
 		t.Errorf("expected successful login, got %v", err)
 	}

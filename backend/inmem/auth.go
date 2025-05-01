@@ -6,6 +6,7 @@ import (
 
 type AuthCache struct {
 	accounts       map[string]domain.Account
+	accountNames   map[string]bool
 	tokenGenerator domain.TokenGenerator
 	idGenerator    domain.IDGenerator
 }
@@ -13,13 +14,14 @@ type AuthCache struct {
 func NewAuthDao(tokenGenerator domain.TokenGenerator, idGenerator domain.IDGenerator) domain.AuthDao {
 	return &AuthCache{
 		accounts:       make(map[string]domain.Account),
+		accountNames:   make(map[string]bool),
 		tokenGenerator: tokenGenerator,
 		idGenerator:    idGenerator,
 	}
 }
 
 func (ctx *AuthCache) Create(account domain.Account) (domain.Account, error) {
-	if _, exists := ctx.accounts[account.Name]; exists {
+	if _, exists := ctx.accountNames[account.Name]; exists {
 		return domain.EmptyAccount, domain.ErrAccountAlreadyExists
 	}
 	if account.Name == "" {
@@ -27,12 +29,13 @@ func (ctx *AuthCache) Create(account domain.Account) (domain.Account, error) {
 	}
 	account.Token = ctx.tokenGenerator.Generate()
 	account.Id = ctx.idGenerator.Generate()
-	ctx.accounts[account.Name] = account
+	ctx.accounts[account.Id] = account
+	ctx.accountNames[account.Name] = true
 	return account, nil
 }
 
-func (ctx *AuthCache) Login(name string, token string) (domain.Account, error) {
-	acc, exists := ctx.accounts[name]
+func (ctx *AuthCache) Login(id string, token string) (domain.Account, error) {
+	acc, exists := ctx.accounts[id]
 	if !exists {
 		return domain.EmptyAccount, domain.ErrAccountNotFound
 	}

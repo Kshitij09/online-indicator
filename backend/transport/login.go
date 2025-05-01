@@ -12,7 +12,7 @@ import (
 )
 
 type LoginRequest struct {
-	Name  string `json:"name"`
+	Id    string `json:"id"`
 	Token string `json:"token"`
 }
 
@@ -32,11 +32,11 @@ func LoginHandler(storage domain.Storage) handlers.Handler {
 			return apierror.SimpleAPIError(http.StatusBadRequest, fmt.Sprintf("invalid request: %s", decodeErr))
 		}
 
-		if req.Name == "" {
-			return apierror.SimpleAPIError(http.StatusBadRequest, "name is required")
+		if req.Id == "" {
+			return apierror.SimpleAPIError(http.StatusBadRequest, "id is required")
 		}
 
-		session, err := service.Login(req.Name, req.Token)
+		session, err := service.Login(req.Id, req.Token)
 		if errors.Is(err, domain.ErrAccountNotFound) {
 			return apierror.SimpleAPIError(http.StatusNotFound, "account does not exist")
 		}

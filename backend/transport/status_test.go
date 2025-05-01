@@ -27,7 +27,7 @@ func TestStatusHandler_Success(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	session, err := authService.Login(acc.Name, acc.Token)
+	session, err := authService.Login(acc.Id, acc.Token)
 	if err != nil {
 		t.Error(err)
 	}
@@ -166,7 +166,7 @@ func TestBatchStatusHandler_Success(t *testing.T) {
 			t.Error(err)
 		}
 		accIds = append(accIds, acc.Id)
-		session, err := authService.Login(acc.Name, acc.Token)
+		session, err := authService.Login(acc.Id, acc.Token)
 		if err != nil {
 			t.Error(err)
 		}
