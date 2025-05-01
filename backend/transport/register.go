@@ -17,6 +17,7 @@ type RegisterRequest struct {
 
 type RegisterResponse struct {
 	Token string `json:"token"`
+	Id    string `json:"id"`
 }
 
 func RegisterHandler(storage domain.Storage) handlers.Handler {
@@ -41,6 +42,7 @@ func RegisterHandler(storage domain.Storage) handlers.Handler {
 		}
 		response := RegisterResponse{
 			Token: created.Token,
+			Id:    created.Id,
 		}
 		err = json.NewEncoder(w).Encode(response)
 		return err
