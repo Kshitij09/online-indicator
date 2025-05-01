@@ -4,10 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/Kshitij09/online-indicator/cmd/http-server/transport/apierror"
-	"github.com/Kshitij09/online-indicator/cmd/http-server/transport/handlers"
 	"github.com/Kshitij09/online-indicator/domain"
 	service2 "github.com/Kshitij09/online-indicator/domain/service"
+	"github.com/Kshitij09/online-indicator/transport/apierror"
+	"github.com/Kshitij09/online-indicator/transport/handlers"
 	"net/http"
 )
 

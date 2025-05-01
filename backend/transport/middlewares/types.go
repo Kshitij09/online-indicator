@@ -1,6 +1,8 @@
 package middlewares
 
-import "github.com/Kshitij09/online-indicator/cmd/http-server/transport/handlers"
+import (
+	"github.com/Kshitij09/online-indicator/transport/handlers"
+)
 
 type Middleware func(next handlers.Handler) handlers.Handler
 

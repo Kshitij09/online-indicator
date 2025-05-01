@@ -2,8 +2,8 @@ package middlewares
 
 import (
 	"errors"
-	"github.com/Kshitij09/online-indicator/cmd/http-server/transport/apierror"
-	"github.com/Kshitij09/online-indicator/cmd/http-server/transport/handlers"
+	"github.com/Kshitij09/online-indicator/transport/apierror"
+	"github.com/Kshitij09/online-indicator/transport/handlers"
 	"log"
 	"net/http"
 	"time"

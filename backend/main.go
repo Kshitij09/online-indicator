@@ -2,9 +2,9 @@ package main
 
 import (
 	"flag"
-	"github.com/Kshitij09/online-indicator/cmd/http-server/transport"
 	"github.com/Kshitij09/online-indicator/domain"
 	"github.com/Kshitij09/online-indicator/inmem"
+	"github.com/Kshitij09/online-indicator/transport"
 	"github.com/jonboulle/clockwork"
 	"time"
 )

@@ -1,11 +1,11 @@
 package transport
 
 import (
-	"github.com/Kshitij09/online-indicator/cmd/http-server/test"
 	"github.com/Kshitij09/online-indicator/domain"
 	"github.com/Kshitij09/online-indicator/domain/service"
 	"github.com/Kshitij09/online-indicator/domain/stubs"
 	"github.com/Kshitij09/online-indicator/inmem"
+	test2 "github.com/Kshitij09/online-indicator/test"
 	"github.com/jonboulle/clockwork"
 	"net/http"
 	"net/http/httptest"
@@ -16,14 +16,14 @@ func TestPingHandler_Unauthorized(t *testing.T) {
 	clock := clockwork.NewFakeClock()
 	staticGen := stubs.StaticGenerator{}
 	storage := inmem.NewStorage(staticGen, staticGen, clock, staticGen)
-	handler := NewHttpHandler(PingHandler(storage, test.Config))
+	handler := NewHttpHandler(PingHandler(storage, test2.Config))
 
 	recorder := httptest.NewRecorder()
 
 	body := PingRequest{
 		SessionId: "123",
 	}
-	req, err := test.CreateRequest(http.MethodPost, "/ping", body)
+	req, err := test2.CreateRequest(http.MethodPost, "/ping", body)
 	if err != nil {
 		t.Error(err)
 	}
@@ -56,11 +56,11 @@ func TestPingHandler_OK(t *testing.T) {
 		t.Error(err)
 	}
 
-	handler := NewHttpHandler(PingHandler(storage, test.Config))
+	handler := NewHttpHandler(PingHandler(storage, test2.Config))
 	recorder := httptest.NewRecorder()
 
 	body := PingRequest{SessionId: session.Id}
-	req, err := test.CreateRequest(http.MethodPost, "/ping", body)
+	req, err := test2.CreateRequest(http.MethodPost, "/ping", body)
 	handler(recorder, req)
 
 	result := recorder.Result()
