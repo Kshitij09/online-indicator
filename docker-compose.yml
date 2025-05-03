@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  backend:
+    build:
+      context: ./backend
+      args:
+        GOARCH: ${GOARCH:-amd64}
+    ports:
+      - "8080:8080"
+    networks:
+      - app-network
+
+  pulsesim:
+    build:
+      context: ./pulsesim
+      args:
+        GOARCH: ${GOARCH:-amd64}
+    environment:
+      - API_URL=http://backend:8080
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+  dashboard:
+    build:
+      context: ./dashboard
+    environment:
+      - API_URL=http://backend:8080
+    ports:
+      - "9001:9001"
+    depends_on:
+      - backend
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    driver: bridge
