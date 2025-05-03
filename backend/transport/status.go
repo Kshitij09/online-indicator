@@ -10,6 +10,8 @@ import (
 	"github.com/Kshitij09/online-indicator/transport/handlers"
 	"github.com/jonboulle/clockwork"
 	"net/http"
+	"sort"
+	"strings"
 )
 
 var PathId = "id"
@@ -89,5 +91,8 @@ func toTransportItems(statuses map[string]domain.ProfileStatus) []StatusResponse
 	for _, status := range statuses {
 		items = append(items, toTransport(status))
 	}
+	sort.Slice(items, func(i, j int) bool {
+		return strings.Compare(items[i].Username, items[j].Username) < 0
+	})
 	return items
 }
