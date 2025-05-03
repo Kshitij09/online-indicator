@@ -38,7 +38,7 @@ func main() {
 	cfg := config{}
 	// Parse command-line flags
 	flag.IntVar(&cfg.NumUsers, "n", intEnvOrDefault("NUM_USERS", 100), "Number of users to simulate")
-	flag.StringVar(&cfg.BaseUrl, "server", stringEnvOrDefault("BACKEND_URL", "http://localhost:8080"), "Backend URL to ping")
+	flag.StringVar(&cfg.BaseUrl, "api-url", stringEnvOrDefault("API_URL", "http://localhost:8080"), "Backend URL to ping")
 	flag.Parse()
 
 	log.SetFlags(log.Ltime)
