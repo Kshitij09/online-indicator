@@ -9,3 +9,7 @@
 * `GET /status/<name>` should return online status of single account.
 * `GET /status/all` should return online status of all the accounts
 * `POST /status/batch` should provide list of ids in the request body and API should response with their online status
+
+## Setup and Running Instructions
+
+For detailed instructions on how to set up and run this project using Docker, please refer to the [Setup and Running Instructions](docs/setup.md) document.
