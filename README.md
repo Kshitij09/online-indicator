@@ -1,6 +1,10 @@
 # Online indicator
 
+![frontend](docs/v0-dashboard.png)
+
 ## v0 requirements (✅ Done)
+
+![architecture](docs/v0-architecture.svg)
 
 * Self-contained, in-memory server
 * `POST /register` endpoint to add new account. It should accept `name` in the request body 
@@ -9,6 +13,11 @@
 * `GET /status/<name>` should return online status of single account.
 * `GET /status/all` should return online status of all the accounts
 * `POST /status/batch` should provide list of ids in the request body and API should response with their online status
+* An HTTP client to simulate the user activity using public APIs
+* A minimal web dashboard showing live status of 'n' users, powered by short-polling
+
+
+For a detailed overview, please refer to the [v0 documentation](docs/v0-docs.md).
 
 ## Setup and Running Instructions
 
