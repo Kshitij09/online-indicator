@@ -15,6 +15,7 @@ func NewHttpHandler(handler handlers.Handler, middlewares ...middlewares.Middlew
 		handler = mdl(handler)
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/json")
 		if err := handler(w, r); err != nil {
 			var apiErr *apierror.APIError
 			var writeErr error
