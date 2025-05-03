@@ -19,7 +19,7 @@ interface StatusResponse {
 }
 
 // List of user IDs to fetch
-const userIds = Array.from({length: 20}, (_, i) => (i + 1).toString());
+const userIds = Array.from({length: 100}, (_, i) => (i + 1).toString());
 
 /**
  * Fetch users from the API
