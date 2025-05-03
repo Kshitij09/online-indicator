@@ -5,25 +5,50 @@ import (
 	"github.com/go-faker/faker/v4"
 	"log"
 	"math/rand"
+	"os"
+	"strconv"
 	"sync"
 	"time"
 )
 
-func main() {
-	// Parse command-line flags
-	numUsers := flag.Int("n", 1, "Number of users to simulate")
-	flag.Parse()
+type config struct {
+	NumUsers int
+	BaseUrl  string
+}
 
-	baseUrl := "http://localhost:8080"
+func intEnvOrDefault(key string, fallback int) int {
+	if value, ok := os.LookupEnv(key); ok {
+		value, err := strconv.Atoi(value)
+		if err != nil {
+			return fallback
+		}
+		return value
+	}
+	return fallback
+}
+
+func stringEnvOrDefault(key, fallback string) string {
+	if value, ok := os.LookupEnv(key); ok {
+		return value
+	}
+	return fallback
+}
+
+func main() {
+	cfg := config{}
+	// Parse command-line flags
+	flag.IntVar(&cfg.NumUsers, "n", intEnvOrDefault("NUM_USERS", 100), "Number of users to simulate")
+	flag.StringVar(&cfg.BaseUrl, "server", stringEnvOrDefault("BACKEND_URL", "http://localhost:8080"), "Backend URL to ping")
+	flag.Parse()
 
 	log.SetFlags(log.Ltime)
 	// Register and login all users
-	log.Printf("Registering and logging in %d users...\n", *numUsers)
-	users := make([]user, *numUsers)
+	log.Printf("Registering and logging in %d users...\n", cfg.NumUsers)
+	users := make([]user, cfg.NumUsers)
 
-	for i := 0; i < *numUsers; i++ {
+	for i := 0; i < cfg.NumUsers; i++ {
 		name := faker.Name()
-		loginResponse, err := registerAndLogin(name, baseUrl)
+		loginResponse, err := registerAndLogin(name, cfg.BaseUrl)
 		if err != nil {
 			panic(err)
 		}
@@ -49,7 +74,7 @@ func main() {
 				interval := 5 + random.Intn(11) // 5 to 15 seconds
 
 				// Ping the server
-				err := Ping(user.SessionId, baseUrl)
+				err := Ping(user.SessionId, cfg.BaseUrl)
 				if err != nil {
 					log.Printf("%s ping failed: %v\n", user.Name, err)
 				} else {
