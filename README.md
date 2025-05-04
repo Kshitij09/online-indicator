@@ -2,6 +2,12 @@
 
 ![frontend](docs/v0-dashboard.png)
 
+## v1 requirements
+
+* Use redis for storing the userId to active session mapping
+* Configure redis ttl for each entry which can be later
+  observed for communicating the status
+
 ## v0 requirements (✅ Done)
 
 ![architecture](docs/v0-architecture.svg)
@@ -17,13 +23,6 @@
 * A minimal web dashboard showing live status of 'n' users, powered by short-polling
 
 For a detailed overview, please refer to the [v0 documentation](docs/v0-docs.md).
-
-## v1 requirements
-
-* Use a websockets for communicating status updates
-* Keep websocket servers separate from the main backend
-  to scale independently
-* Make dashboard's target userIds configurable (by range)
 
 ## Setup and Running Instructions
 
