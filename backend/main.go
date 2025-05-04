@@ -35,11 +35,11 @@ func main() {
 		}
 	}
 
-	tokenGen := domain.NewUUIDTokenGenerator()
+	apiKeyGen := domain.NewUUIDApiKeyGenerator()
 	sessionGen := domain.NewUUIDSessionGenerator()
 	realClock := clockwork.NewRealClock()
 	idGen := domain.NewSeqIdGenerator()
-	storage := inmem.NewStorage(tokenGen, sessionGen, realClock, idGen)
+	storage := inmem.NewStorage(apiKeyGen, sessionGen, realClock, idGen)
 	server := transport.NewServer(storage, cfg, realClock)
 	err := server.Run(cfg.ServerPort)
 	if err != nil {

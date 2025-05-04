@@ -27,7 +27,7 @@ func TestStatusHandler_Success(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	session, err := authService.Login(acc.Id, acc.Token)
+	session, err := authService.Login(acc.Id, acc.ApiKey)
 	if err != nil {
 		t.Error(err)
 	}
@@ -37,7 +37,7 @@ func TestStatusHandler_Success(t *testing.T) {
 		storage.Profile(),
 		clock,
 	)
-	err = statusService.Ping(session.Id)
+	err = statusService.Ping(session.AccountId, session.Token)
 	if err != nil {
 		t.Error(err)
 	}
@@ -65,7 +65,7 @@ func TestStatusHandler_Success(t *testing.T) {
 	expectedOnlineMillis := clock.Now().UnixMilli()
 	expectedBody := StatusResponse{
 		Id:         acc.Id,
-		Username:   acc.Name,
+		Name:       acc.Name,
 		IsOnline:   true,
 		LastOnline: &expectedOnlineMillis,
 	}
@@ -130,7 +130,7 @@ func TestStatusHandler_NoLoginAsOffline(t *testing.T) {
 	if body.IsOnline {
 		t.Errorf("account should not be online")
 	}
-	if body.Username == "" || body.Id == "" {
+	if body.Name == "" || body.Id == "" {
 		t.Errorf("account details should not be empty")
 	}
 }
@@ -171,7 +171,7 @@ func TestBatchStatusHandler_Success(t *testing.T) {
 			t.Error(err)
 		}
 		accIds = append(accIds, acc.Id)
-		session, err := authService.Login(acc.Id, acc.Token)
+		session, err := authService.Login(acc.Id, acc.ApiKey)
 		if err != nil {
 			t.Error(err)
 		}
@@ -181,14 +181,14 @@ func TestBatchStatusHandler_Success(t *testing.T) {
 			storage.Profile(),
 			clock,
 		)
-		err = statusService.Ping(session.Id)
+		err = statusService.Ping(session.AccountId, session.Token)
 		if err != nil {
 			t.Error(err)
 		}
 		lastOnlineMillis := clock.Now().UnixMilli()
 		response := StatusResponse{
 			Id:         acc.Id,
-			Username:   acc.Name,
+			Name:       acc.Name,
 			IsOnline:   true,
 			LastOnline: &lastOnlineMillis,
 		}
@@ -238,7 +238,7 @@ func TestStatusHandler_OnlineToOfflineAfterThreshold(t *testing.T) {
 	}
 
 	// Login
-	session, err := authService.Login(acc.Id, acc.Token)
+	session, err := authService.Login(acc.Id, acc.ApiKey)
 	if err != nil {
 		t.Error(err)
 	}
@@ -250,7 +250,7 @@ func TestStatusHandler_OnlineToOfflineAfterThreshold(t *testing.T) {
 		storage.Profile(),
 		clock,
 	)
-	err = statusService.Ping(session.Id)
+	err = statusService.Ping(session.AccountId, session.Token)
 	if err != nil {
 		t.Error(err)
 	}
@@ -313,7 +313,7 @@ func TestStatusHandler_OfflineToOnline(t *testing.T) {
 	}
 
 	// Login
-	session, err := authService.Login(acc.Id, acc.Token)
+	session, err := authService.Login(acc.Id, acc.ApiKey)
 	if err != nil {
 		t.Error(err)
 	}
@@ -349,7 +349,7 @@ func TestStatusHandler_OfflineToOnline(t *testing.T) {
 		storage.Profile(),
 		clock,
 	)
-	err = statusService.Ping(session.Id)
+	err = statusService.Ping(session.AccountId, session.Token)
 	if err != nil {
 		t.Error(err)
 	}

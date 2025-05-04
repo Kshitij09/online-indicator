@@ -14,11 +14,9 @@ import (
 	"strings"
 )
 
-var PathId = "id"
-
 type StatusResponse struct {
 	Id         string `json:"id"`
-	Username   string `json:"username"`
+	Name       string `json:"name"`
 	IsOnline   bool   `json:"is_online"`
 	LastOnline *int64 `json:"last_online,omitempty"`
 }
@@ -80,7 +78,7 @@ func toTransport(status domain.ProfileStatus) StatusResponse {
 	}
 	return StatusResponse{
 		Id:         status.UserId,
-		Username:   status.Username,
+		Name:       status.Name,
 		IsOnline:   status.IsOnline,
 		LastOnline: lastOnlineEpochMillis,
 	}
@@ -92,7 +90,7 @@ func toTransportItems(statuses map[string]domain.ProfileStatus) []StatusResponse
 		items = append(items, toTransport(status))
 	}
 	sort.Slice(items, func(i, j int) bool {
-		return strings.Compare(items[i].Username, items[j].Username) < 0
+		return strings.Compare(items[i].Name, items[j].Name) < 0
 	})
 	return items
 }

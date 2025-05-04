@@ -16,8 +16,8 @@ func NewAuthService(auth domain.AuthDao, session domain.SessionDao, profile doma
 	}
 }
 
-func (s AuthService) Login(id string, token string) (domain.Session, error) {
-	acc, err := s.auth.Login(id, token)
+func (s AuthService) Login(id string, apiKey string) (domain.Session, error) {
+	acc, err := s.auth.Login(id, apiKey)
 	if err != nil {
 		return domain.Session{}, err
 	}
@@ -30,8 +30,8 @@ func (s AuthService) CreateAccount(account domain.Account) (domain.Account, erro
 		return domain.EmptyAccount, err
 	}
 	profile := domain.Profile{
-		UserId:   acc.Id,
-		Username: acc.Name,
+		UserId: acc.Id,
+		Name:   acc.Name,
 	}
 	err = s.profile.Create(profile)
 	if err != nil {

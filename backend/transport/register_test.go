@@ -34,8 +34,8 @@ func TestRegisterHandler_Success(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if resp.Token != staticGenerator.StubValue {
-		t.Errorf("token incorrect, expected %s, got %s", staticGenerator.StubValue, resp.Token)
+	if resp.ApiKey != staticGenerator.StubValue {
+		t.Errorf("api key incorrect, expected %s, got %s", staticGenerator.StubValue, resp.ApiKey)
 	}
 }
 
@@ -123,12 +123,12 @@ func createRegisterRequest(req RegisterRequest) (*http.Request, error) {
 }
 
 func registerHandler(
-	tokenGen domain.TokenGenerator,
+	apiKeyGen domain.ApiKeyGenerator,
 	sessionGen domain.SessionGenerator,
 	clock clockwork.Clock,
 	idGen domain.IDGenerator,
 ) http.HandlerFunc {
-	storage := inmem.NewStorage(tokenGen, sessionGen, clock, idGen)
+	storage := inmem.NewStorage(apiKeyGen, sessionGen, clock, idGen)
 	register := RegisterHandler(storage)
 	return NewHttpHandler(register)
 }

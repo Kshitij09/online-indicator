@@ -12,7 +12,7 @@ import (
 
 func TestProfileCache_Create(t *testing.T) {
 	cache := NewProfileCache()
-	expected := domain.Profile{UserId: "1", Username: "test1"}
+	expected := domain.Profile{UserId: "1", Name: "test1"}
 	err := cache.Create(expected)
 	if err != nil {
 		t.Error(err)
@@ -28,7 +28,7 @@ func TestProfileCache_Create(t *testing.T) {
 
 func TestProfileCache_CreateDuplicate(t *testing.T) {
 	cache := NewProfileCache()
-	expected := domain.Profile{UserId: "1", Username: "test1"}
+	expected := domain.Profile{UserId: "1", Name: "test1"}
 	err := cache.Create(expected)
 	if err != nil {
 		t.Error(err)
@@ -39,17 +39,17 @@ func TestProfileCache_CreateDuplicate(t *testing.T) {
 	}
 }
 
-func TestProfileCache_UsernameExists(t *testing.T) {
+func TestProfileCache_NameExists(t *testing.T) {
 	cache := NewProfileCache()
-	expected := domain.Profile{UserId: "1", Username: "test1"}
-	if cache.UsernameExists(expected.UserId) != false {
+	expected := domain.Profile{UserId: "1", Name: "test1"}
+	if cache.NameExists(expected.UserId) != false {
 		t.Errorf("Profile should not exist initially")
 	}
 	err := cache.Create(expected)
 	if err != nil {
 		t.Error(err)
 	}
-	if cache.UsernameExists(expected.Username) != true {
+	if cache.NameExists(expected.Name) != true {
 		t.Errorf("Profile should exist after creation")
 	}
 }
@@ -59,8 +59,8 @@ func TestProfileCache_BatchGetByUserId(t *testing.T) {
 	expected := make(map[string]domain.Profile)
 	for i := 0; i < 50; i++ {
 		userId := strconv.Itoa(i)
-		userName := "test" + userId
-		profile := domain.Profile{UserId: userId, Username: userName}
+		name := "test" + userId
+		profile := domain.Profile{UserId: userId, Name: name}
 		expected[userId] = profile
 		err := cache.Create(profile)
 		if err != nil {

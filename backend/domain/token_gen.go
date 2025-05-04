@@ -2,16 +2,16 @@ package domain
 
 import "github.com/google/uuid"
 
-type TokenGenerator interface {
+type ApiKeyGenerator interface {
 	Generate() string
 }
 
-type uuidTokenGenerator struct{}
+type uuidApiKeyGenerator struct{}
 
-func NewUUIDTokenGenerator() TokenGenerator {
-	return uuidTokenGenerator{}
+func NewUUIDApiKeyGenerator() ApiKeyGenerator {
+	return uuidApiKeyGenerator{}
 }
 
-func (uuidTokenGenerator) Generate() string {
+func (uuidApiKeyGenerator) Generate() string {
 	return uuid.NewString()
 }

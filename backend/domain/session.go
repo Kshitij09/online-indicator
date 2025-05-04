@@ -6,18 +6,19 @@ import (
 )
 
 type Session struct {
-	Id          string
+	Token       string
 	AccountId   string
 	CreatedAt   time.Time
 	RefreshedAt time.Time
 }
 
 var ErrSessionNotFound = errors.New("session not found")
+var ErrInvalidSession = errors.New("invalid session")
 
 type SessionDao interface {
 	Create(accountId string) Session
-	Refresh(sessionId string) bool
-	GetBySessionId(sessionId string) (Session, bool)
+	Refresh(accountId string)
+	GetBySessionToken(sessionToken string) (Session, bool)
 	GetByAccountId(accountId string) (Session, bool)
 	BatchGetByAccountId([]string) map[string]Session
 }

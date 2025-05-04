@@ -3,9 +3,9 @@ package domain
 import "errors"
 
 type Account struct {
-	Name  string
-	Token string
-	Id    string
+	Name   string
+	ApiKey string
+	Id     string
 }
 
 var EmptyAccount = Account{}
@@ -17,7 +17,7 @@ var ErrInvalidCredentials = errors.New("invalid credentials")
 
 type AuthDao interface {
 	Create(Account) (Account, error)
-	Login(name string, token string) (Account, error)
+	Login(name string, apiKey string) (Account, error)
 	Update(Account) error
 	Delete(name string) error
 }

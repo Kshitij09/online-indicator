@@ -16,8 +16,8 @@ type RegisterRequest struct {
 }
 
 type RegisterResponse struct {
-	Token string `json:"token"`
-	Id    string `json:"id"`
+	ApiKey string `json:"apiKey"`
+	Id     string `json:"id"`
 }
 
 func RegisterHandler(storage domain.Storage) handlers.Handler {
@@ -41,8 +41,8 @@ func RegisterHandler(storage domain.Storage) handlers.Handler {
 			return apierror.SimpleAPIError(http.StatusBadRequest, "name is required")
 		}
 		response := RegisterResponse{
-			Token: created.Token,
-			Id:    created.Id,
+			ApiKey: created.ApiKey,
+			Id:     created.Id,
 		}
 		err = json.NewEncoder(w).Encode(response)
 		return err

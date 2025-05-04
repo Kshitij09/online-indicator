@@ -16,11 +16,11 @@ func TestSessionCache_CreateAndGet(t *testing.T) {
 	clock := clockwork.NewFakeClock()
 	cache := NewSessionCache(staticGen, clock)
 	expectedSession := cache.Create("abc")
-	session, exists := cache.GetBySessionId("non-existent")
+	session, exists := cache.GetBySessionToken("non-existent")
 	if exists {
 		t.Errorf("session '%s'should not exist", "non-existent")
 	}
-	session, exists = cache.GetBySessionId(expectedSession.Id)
+	session, exists = cache.GetBySessionToken(expectedSession.Token)
 	if !exists {
 		t.Errorf("session '%s'should exist", expectedSession.AccountId)
 	}
@@ -31,8 +31,8 @@ func TestSessionCache_CreateAndGet(t *testing.T) {
 	if session.AccountId != "abc" {
 		t.Errorf("session accountId should be %s, got %s", expectedSession.AccountId, session.AccountId)
 	}
-	if session.Id != expectedSession.Id {
-		t.Errorf("session Id should be %s, got %s", expectedSession.Id, session.Id)
+	if session.Token != expectedSession.Token {
+		t.Errorf("session Token should be %s, got %s", expectedSession.Token, session.Token)
 	}
 
 	session, exists = cache.GetByAccountId(expectedSession.AccountId)
@@ -45,8 +45,8 @@ func TestSessionCache_CreateAndGet(t *testing.T) {
 	if session.AccountId != "abc" {
 		t.Errorf("session accountId should be %s, got %s", expectedSession.AccountId, session.AccountId)
 	}
-	if session.Id != expectedSession.Id {
-		t.Errorf("session Id should be %s, got %s", expectedSession.Id, session.Id)
+	if session.Token != expectedSession.Token {
+		t.Errorf("session Token should be %s, got %s", expectedSession.Token, session.Token)
 	}
 }
 

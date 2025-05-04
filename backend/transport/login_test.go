@@ -14,13 +14,13 @@ import (
 )
 
 func TestLoginHandler_Success(t *testing.T) {
-	body := LoginRequest{Id: "1", Token: "123"}
+	body := LoginRequest{Id: "1", ApiKey: "123"}
 	req, err := createLoginRequest(body)
 	if err != nil {
 		t.Error(err)
 	}
 	recorder := httptest.NewRecorder()
-	staticGenerator := stubs.StaticGenerator{StubValue: body.Token}
+	staticGenerator := stubs.StaticGenerator{StubValue: body.ApiKey}
 	idGenerator := stubs.StaticGenerator{StubValue: body.Id}
 	fakeClock := clockwork.NewFakeClock()
 	storage := inmem.NewStorage(staticGenerator, staticGenerator, fakeClock, idGenerator)
@@ -43,19 +43,19 @@ func TestLoginHandler_Success(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if resp.SessionId != staticGenerator.StubValue {
-		t.Errorf("session incorrect, expected %s, got %s", staticGenerator.StubValue, resp.SessionId)
+	if resp.SessionToken != staticGenerator.StubValue {
+		t.Errorf("session incorrect, expected %s, got %s", staticGenerator.StubValue, resp.SessionToken)
 	}
 }
 
 func TestLoginHandler_InvalidCredentials(t *testing.T) {
-	body := LoginRequest{Id: "1", Token: "123"}
+	body := LoginRequest{Id: "1", ApiKey: "123"}
 	req, err := createLoginRequest(body)
 	if err != nil {
 		t.Error(err)
 	}
 	recorder := httptest.NewRecorder()
-	staticGenerator := stubs.StaticGenerator{StubValue: "random"} // token not matching
+	staticGenerator := stubs.StaticGenerator{StubValue: "random"} // api key not matching
 	idGenerator := stubs.StaticGenerator{StubValue: body.Id}
 	fakeClock := clockwork.NewFakeClock()
 	storage := inmem.NewStorage(staticGenerator, staticGenerator, fakeClock, idGenerator)
@@ -154,12 +154,12 @@ func createLoginRequest(req LoginRequest) (*http.Request, error) {
 }
 
 func loginHandler(
-	tokenGen domain.TokenGenerator,
+	apiKeyGen domain.ApiKeyGenerator,
 	sessionGen domain.SessionGenerator,
 	clock clockwork.Clock,
 	idGen domain.IDGenerator,
 ) http.HandlerFunc {
-	storage := inmem.NewStorage(tokenGen, sessionGen, clock, idGen)
+	storage := inmem.NewStorage(apiKeyGen, sessionGen, clock, idGen)
 	register := LoginHandler(storage)
 	return NewHttpHandler(register)
 }

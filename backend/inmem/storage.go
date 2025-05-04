@@ -12,13 +12,13 @@ type Storage struct {
 }
 
 func NewStorage(
-	tokenGen domain.TokenGenerator,
+	apiKeyGen domain.ApiKeyGenerator,
 	sessionGen domain.SessionGenerator,
 	clock clockwork.Clock,
 	idGen domain.IDGenerator,
 ) *Storage {
 	return &Storage{
-		auth:    NewAuthDao(tokenGen, idGen),
+		auth:    NewAuthDao(apiKeyGen, idGen),
 		session: NewSessionCache(sessionGen, clock),
 		profile: NewProfileCache(),
 	}

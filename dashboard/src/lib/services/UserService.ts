@@ -9,7 +9,7 @@ export interface User {
 // Define the API response interface
 interface UserStatus {
     id: string;
-    username: string;
+    name: string;
     is_online: boolean;
     last_online: number;
 }
@@ -48,7 +48,7 @@ export const fetchUsers = async (): Promise<User[]> => {
         // Map API response to User interface
         return data.items.map(item => ({
             id: item.id,
-            name: item.username, // Map username to name
+            name: item.name, // Map username to name
             online: item.is_online, // Map is_online to online
             last_online: item.last_online
         }));
