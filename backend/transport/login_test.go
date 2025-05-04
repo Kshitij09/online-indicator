@@ -43,8 +43,8 @@ func TestLoginHandler_Success(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	if resp.SessionId != staticGenerator.StubValue {
-		t.Errorf("session incorrect, expected %s, got %s", staticGenerator.StubValue, resp.SessionId)
+	if resp.SessionToken != staticGenerator.StubValue {
+		t.Errorf("session incorrect, expected %s, got %s", staticGenerator.StubValue, resp.SessionToken)
 	}
 }
 

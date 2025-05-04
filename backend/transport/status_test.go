@@ -37,7 +37,7 @@ func TestStatusHandler_Success(t *testing.T) {
 		storage.Profile(),
 		clock,
 	)
-	err = statusService.Ping(session.Id)
+	err = statusService.Ping(session.Token)
 	if err != nil {
 		t.Error(err)
 	}
@@ -181,7 +181,7 @@ func TestBatchStatusHandler_Success(t *testing.T) {
 			storage.Profile(),
 			clock,
 		)
-		err = statusService.Ping(session.Id)
+		err = statusService.Ping(session.Token)
 		if err != nil {
 			t.Error(err)
 		}
@@ -250,7 +250,7 @@ func TestStatusHandler_OnlineToOfflineAfterThreshold(t *testing.T) {
 		storage.Profile(),
 		clock,
 	)
-	err = statusService.Ping(session.Id)
+	err = statusService.Ping(session.Token)
 	if err != nil {
 		t.Error(err)
 	}
@@ -349,7 +349,7 @@ func TestStatusHandler_OfflineToOnline(t *testing.T) {
 		storage.Profile(),
 		clock,
 	)
-	err = statusService.Ping(session.Id)
+	err = statusService.Ping(session.Token)
 	if err != nil {
 		t.Error(err)
 	}

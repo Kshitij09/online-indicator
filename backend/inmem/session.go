@@ -7,19 +7,19 @@ import (
 )
 
 type SessionCache struct {
-	mu              sync.RWMutex
-	sessionIdLookup map[string]*domain.Session
-	accountIdLookup map[string]*domain.Session
-	generator       domain.SessionGenerator
-	clock           clockwork.Clock
+	mu                 sync.RWMutex
+	sessionTokenLookup map[string]*domain.Session
+	accountIdLookup    map[string]*domain.Session
+	generator          domain.SessionGenerator
+	clock              clockwork.Clock
 }
 
 func NewSessionCache(generator domain.SessionGenerator, clock clockwork.Clock) *SessionCache {
 	return &SessionCache{
-		sessionIdLookup: make(map[string]*domain.Session),
-		accountIdLookup: make(map[string]*domain.Session),
-		generator:       generator,
-		clock:           clock,
+		sessionTokenLookup: make(map[string]*domain.Session),
+		accountIdLookup:    make(map[string]*domain.Session),
+		generator:          generator,
+		clock:              clock,
 	}
 }
 
@@ -28,20 +28,20 @@ func (ctx *SessionCache) Create(accountId string) domain.Session {
 	defer ctx.mu.Unlock()
 	createdAt := ctx.clock.Now()
 	session := &domain.Session{
-		Id:          ctx.generator.Generate(),
+		Token:       ctx.generator.Generate(),
 		AccountId:   accountId,
 		CreatedAt:   createdAt,
 		RefreshedAt: createdAt,
 	}
-	ctx.sessionIdLookup[session.Id] = session
+	ctx.sessionTokenLookup[session.Token] = session
 	ctx.accountIdLookup[accountId] = session
 	return *session
 }
 
-func (ctx *SessionCache) GetBySessionId(sessionId string) (domain.Session, bool) {
+func (ctx *SessionCache) GetBySessionToken(sessionToken string) (domain.Session, bool) {
 	ctx.mu.RLock()
 	defer ctx.mu.RUnlock()
-	session, exists := ctx.sessionIdLookup[sessionId]
+	session, exists := ctx.sessionTokenLookup[sessionToken]
 	if exists {
 		return *session, true
 	} else {
@@ -74,10 +74,10 @@ func (ctx *SessionCache) BatchGetByAccountId(ids []string) map[string]domain.Ses
 	return result
 }
 
-func (ctx *SessionCache) Refresh(sessionId string) bool {
+func (ctx *SessionCache) Refresh(sessionToken string) bool {
 	ctx.mu.Lock()
 	defer ctx.mu.Unlock()
-	session, exists := ctx.sessionIdLookup[sessionId]
+	session, exists := ctx.sessionTokenLookup[sessionToken]
 	if exists {
 		session.RefreshedAt = ctx.clock.Now()
 		return true

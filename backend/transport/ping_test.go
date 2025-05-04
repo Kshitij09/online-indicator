@@ -21,7 +21,7 @@ func TestPingHandler_Unauthorized(t *testing.T) {
 	recorder := httptest.NewRecorder()
 
 	body := PingRequest{
-		SessionId: "123",
+		SessionToken: "123",
 	}
 	req, err := testfixtures.CreateRequest(http.MethodPost, "/ping", body)
 	if err != nil {
@@ -59,7 +59,7 @@ func TestPingHandler_OK(t *testing.T) {
 	handler := NewHttpHandler(PingHandler(storage, testfixtures.Config, clock))
 	recorder := httptest.NewRecorder()
 
-	body := PingRequest{SessionId: session.Id}
+	body := PingRequest{SessionToken: session.Token}
 	req, err := testfixtures.CreateRequest(http.MethodPost, "/ping", body)
 	handler(recorder, req)
 

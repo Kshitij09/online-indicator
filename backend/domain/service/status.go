@@ -27,8 +27,8 @@ func NewStatusService(
 	}
 }
 
-func (ctx *StatusService) Ping(sessionId string) error {
-	found := ctx.session.Refresh(sessionId)
+func (ctx *StatusService) Ping(sessionToken string) error {
+	found := ctx.session.Refresh(sessionToken)
 	if !found {
 		return domain.ErrSessionNotFound
 	}

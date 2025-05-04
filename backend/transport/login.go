@@ -17,7 +17,7 @@ type LoginRequest struct {
 }
 
 type LoginResponse struct {
-	SessionId string `json:"sessionId"`
+	SessionToken string `json:"sessionToken"`
 }
 
 func LoginHandler(storage domain.Storage) handlers.Handler {
@@ -44,7 +44,7 @@ func LoginHandler(storage domain.Storage) handlers.Handler {
 			return apierror.SimpleAPIError(http.StatusUnauthorized, "invalid credentials")
 		}
 		response := LoginResponse{
-			SessionId: session.Id,
+			SessionToken: session.Token,
 		}
 		err = json.NewEncoder(w).Encode(response)
 		return err

@@ -13,7 +13,7 @@ import (
 )
 
 type PingRequest struct {
-	SessionId string `json:"sessionId"`
+	SessionToken string `json:"sessionToken"`
 }
 
 func PingHandler(storage domain.Storage, config domain.Config, clock clockwork.Clock) handlers.Handler {
@@ -29,9 +29,9 @@ func PingHandler(storage domain.Storage, config domain.Config, clock clockwork.C
 		if decodeErr != nil {
 			return apierror.SimpleAPIError(http.StatusBadRequest, fmt.Sprintf("invalid request: %s", decodeErr))
 		}
-		err := service.Ping(req.SessionId)
+		err := service.Ping(req.SessionToken)
 		if errors.Is(err, domain.ErrSessionNotFound) {
-			return apierror.SimpleAPIError(http.StatusUnauthorized, fmt.Sprintf("session not found: %s", req.SessionId))
+			return apierror.SimpleAPIError(http.StatusUnauthorized, fmt.Sprintf("session not found: %s", req.SessionToken))
 		}
 		if err != nil {
 			return err
