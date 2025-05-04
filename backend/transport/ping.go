@@ -31,7 +31,7 @@ func PingHandler(storage domain.Storage, config domain.Config, clock clockwork.C
 		}
 		err := service.Ping(req.SessionToken)
 		if errors.Is(err, domain.ErrSessionNotFound) {
-			return apierror.SimpleAPIError(http.StatusUnauthorized, fmt.Sprintf("session not found: %s", req.SessionToken))
+			return apierror.SimpleAPIError(http.StatusUnauthorized, fmt.Sprintf("session not found"))
 		}
 		if err != nil {
 			return err
