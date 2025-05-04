@@ -16,30 +16,23 @@ type config struct {
 	BaseUrl  string
 }
 
-func intEnvOrDefault(key string, fallback int) int {
-	if value, ok := os.LookupEnv(key); ok {
-		value, err := strconv.Atoi(value)
-		if err != nil {
-			return fallback
-		}
-		return value
-	}
-	return fallback
-}
-
-func stringEnvOrDefault(key, fallback string) string {
-	if value, ok := os.LookupEnv(key); ok {
-		return value
-	}
-	return fallback
-}
-
 func main() {
 	cfg := config{}
 	// Parse command-line flags
-	flag.IntVar(&cfg.NumUsers, "n", intEnvOrDefault("NUM_USERS", 100), "Number of users to simulate")
-	flag.StringVar(&cfg.BaseUrl, "api-url", stringEnvOrDefault("API_URL", "http://localhost:8080"), "Backend URL to ping")
+	flag.IntVar(&cfg.NumUsers, "n", 100, "Number of users to simulate")
+	flag.StringVar(&cfg.BaseUrl, "api-url", "http://localhost:8080", "Backend URL to ping")
 	flag.Parse()
+
+	envNumUsers, set := os.LookupEnv("NUM_USERS")
+	if set {
+		if envNumUsers, err := strconv.Atoi(envNumUsers); err != nil {
+			cfg.NumUsers = envNumUsers
+		}
+	}
+	envBaseUrl, set := os.LookupEnv("API_URL")
+	if set {
+		cfg.BaseUrl = envBaseUrl
+	}
 
 	log.SetFlags(log.Ltime)
 	// Register and login all users
