@@ -28,11 +28,12 @@ type BatchStatusResponse struct {
 	Items []StatusResponse `json:"items"`
 }
 
-func StatusHandler(storage domain.Storage, config domain.Config, clock clockwork.Clock) handlers.Handler {
+func StatusHandler(storage domain.Storage, config domain.Config, clock clockwork.Clock, lastSeen domain.LastSeenDao) handlers.Handler {
 	service := service2.NewStatusService(
 		storage.Session(),
 		config.OnlineThreshold,
 		storage.Profile(),
+		lastSeen,
 		clock,
 	)
 	return func(w http.ResponseWriter, r *http.Request) error {
@@ -49,11 +50,12 @@ func StatusHandler(storage domain.Storage, config domain.Config, clock clockwork
 	}
 }
 
-func BatchStatusHandler(storage domain.Storage, config domain.Config, clock clockwork.Clock) handlers.Handler {
+func BatchStatusHandler(storage domain.Storage, config domain.Config, clock clockwork.Clock, lastSeen domain.LastSeenDao) handlers.Handler {
 	service := service2.NewStatusService(
 		storage.Session(),
 		config.OnlineThreshold,
 		storage.Profile(),
+		lastSeen,
 		clock,
 	)
 	return func(w http.ResponseWriter, r *http.Request) error {

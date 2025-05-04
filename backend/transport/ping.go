@@ -15,11 +15,12 @@ type PingRequest struct {
 	SessionToken string `json:"sessionToken"`
 }
 
-func PingHandler(storage domain.Storage, config domain.Config, clock clockwork.Clock) handlers.Handler {
+func PingHandler(storage domain.Storage, config domain.Config, clock clockwork.Clock, lastSeen domain.LastSeenDao) handlers.Handler {
 	service := service2.NewStatusService(
 		storage.Session(),
 		config.OnlineThreshold,
 		storage.Profile(),
+		lastSeen,
 		clock,
 	)
 	return func(w http.ResponseWriter, r *http.Request) error {

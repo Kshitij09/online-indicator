@@ -21,6 +21,7 @@ func TestStatusHandler_Success(t *testing.T) {
 	staticGen := stubs.StaticGenerator{StubValue: "123"}
 	clock := clockwork.NewFakeClock()
 	storage := inmem.NewStorage(staticGen, staticGen, clock, staticGen)
+	lastSeen := stubs.StubLastSeenDao{}
 	authService := service.NewAuthService(storage.Auth(), storage.Session(), storage.Profile())
 	acc := domain.Account{Name: "john"}
 	acc, err := authService.CreateAccount(acc)
@@ -35,6 +36,7 @@ func TestStatusHandler_Success(t *testing.T) {
 		storage.Session(),
 		testfixtures.Config.OnlineThreshold,
 		storage.Profile(),
+		lastSeen,
 		clock,
 	)
 	err = statusService.Ping(session.AccountId, session.Token)
@@ -42,7 +44,7 @@ func TestStatusHandler_Success(t *testing.T) {
 		t.Error(err)
 	}
 
-	handler := NewHttpHandler(StatusHandler(storage, testfixtures.Config, clock))
+	handler := NewHttpHandler(StatusHandler(storage, testfixtures.Config, clock, lastSeen))
 
 	req, err := http.NewRequest(http.MethodGet, "/status", nil)
 	if err != nil {
@@ -80,7 +82,8 @@ func TestStatusHandler_AccountNotFound(t *testing.T) {
 	staticGen := stubs.StaticGenerator{StubValue: "123"}
 	clock := clockwork.NewFakeClock()
 	storage := inmem.NewStorage(staticGen, staticGen, clock, staticGen)
-	handler := NewHttpHandler(StatusHandler(storage, testfixtures.Config, clock))
+	lastSeen := stubs.StubLastSeenDao{}
+	handler := NewHttpHandler(StatusHandler(storage, testfixtures.Config, clock, lastSeen))
 
 	req, err := http.NewRequest(http.MethodGet, "/status", nil)
 	if err != nil {
@@ -101,13 +104,14 @@ func TestStatusHandler_NoLoginAsOffline(t *testing.T) {
 	staticGen := stubs.StaticGenerator{StubValue: "123"}
 	clock := clockwork.NewFakeClock()
 	storage := inmem.NewStorage(staticGen, staticGen, clock, staticGen)
+	lastSeen := stubs.StubLastSeenDao{}
 	authService := service.NewAuthService(storage.Auth(), storage.Session(), storage.Profile())
 	acc := domain.Account{Name: "john"}
 	acc, err := authService.CreateAccount(acc)
 	if err != nil {
 		t.Error(err)
 	}
-	handler := NewHttpHandler(StatusHandler(storage, testfixtures.Config, clock))
+	handler := NewHttpHandler(StatusHandler(storage, testfixtures.Config, clock, lastSeen))
 
 	req, err := http.NewRequest(http.MethodGet, "/status", nil)
 	if err != nil {
@@ -139,7 +143,8 @@ func TestStatusHandler_MissingAccountId(t *testing.T) {
 	staticGen := stubs.StaticGenerator{StubValue: "123"}
 	clock := clockwork.NewFakeClock()
 	storage := inmem.NewStorage(staticGen, staticGen, clock, staticGen)
-	handler := NewHttpHandler(StatusHandler(storage, testfixtures.Config, clock))
+	lastSeen := stubs.StubLastSeenDao{}
+	handler := NewHttpHandler(StatusHandler(storage, testfixtures.Config, clock, lastSeen))
 
 	req, err := http.NewRequest(http.MethodGet, "/status", nil)
 	if err != nil {
@@ -160,6 +165,7 @@ func TestBatchStatusHandler_Success(t *testing.T) {
 	staticGen := stubs.StaticGenerator{StubValue: "123"}
 	clock := clockwork.NewFakeClock()
 	storage := inmem.NewStorage(staticGen, staticGen, clock, seqGen)
+	lastSeen := stubs.StubLastSeenDao{}
 	authService := service.NewAuthService(storage.Auth(), storage.Session(), storage.Profile())
 	accIds := make([]string, 0, 100)
 	expected := make([]StatusResponse, 0, 100)
@@ -179,6 +185,7 @@ func TestBatchStatusHandler_Success(t *testing.T) {
 			storage.Session(),
 			testfixtures.Config.OnlineThreshold,
 			storage.Profile(),
+			lastSeen,
 			clock,
 		)
 		err = statusService.Ping(session.AccountId, session.Token)
@@ -195,7 +202,7 @@ func TestBatchStatusHandler_Success(t *testing.T) {
 		expected = append(expected, response)
 	}
 
-	handler := NewHttpHandler(BatchStatusHandler(storage, testfixtures.Config, clock))
+	handler := NewHttpHandler(BatchStatusHandler(storage, testfixtures.Config, clock, lastSeen))
 
 	reqBody := BatchStatusRequest{Ids: accIds}
 	req, err := testfixtures.CreateRequest(http.MethodPost, "/batch-status", reqBody)
@@ -228,6 +235,7 @@ func TestStatusHandler_OnlineToOfflineAfterThreshold(t *testing.T) {
 	staticGen := stubs.StaticGenerator{StubValue: "123"}
 	clock := clockwork.NewFakeClock()
 	storage := inmem.NewStorage(staticGen, staticGen, clock, staticGen)
+	lastSeen := stubs.StubLastSeenDao{}
 	authService := service.NewAuthService(storage.Auth(), storage.Session(), storage.Profile())
 
 	// Register
@@ -248,6 +256,7 @@ func TestStatusHandler_OnlineToOfflineAfterThreshold(t *testing.T) {
 		storage.Session(),
 		testfixtures.Config.OnlineThreshold,
 		storage.Profile(),
+		lastSeen,
 		clock,
 	)
 	err = statusService.Ping(session.AccountId, session.Token)
@@ -255,7 +264,7 @@ func TestStatusHandler_OnlineToOfflineAfterThreshold(t *testing.T) {
 		t.Error(err)
 	}
 
-	handler := NewHttpHandler(StatusHandler(storage, testfixtures.Config, clock))
+	handler := NewHttpHandler(StatusHandler(storage, testfixtures.Config, clock, lastSeen))
 
 	// Verify online status
 	req, err := http.NewRequest(http.MethodGet, "/status", nil)
@@ -303,6 +312,7 @@ func TestStatusHandler_OfflineToOnline(t *testing.T) {
 	staticGen := stubs.StaticGenerator{StubValue: "123"}
 	clock := clockwork.NewFakeClock()
 	storage := inmem.NewStorage(staticGen, staticGen, clock, staticGen)
+	lastSeen := stubs.StubLastSeenDao{}
 	authService := service.NewAuthService(storage.Auth(), storage.Session(), storage.Profile())
 
 	// Register
@@ -321,7 +331,7 @@ func TestStatusHandler_OfflineToOnline(t *testing.T) {
 	// Advance time beyond initial ping by logic
 	clock.Advance(testfixtures.Config.OnlineThreshold + 1)
 
-	handler := NewHttpHandler(StatusHandler(storage, testfixtures.Config, clock))
+	handler := NewHttpHandler(StatusHandler(storage, testfixtures.Config, clock, lastSeen))
 
 	// Verify offline status
 	req, err := http.NewRequest(http.MethodGet, "/status", nil)
@@ -347,6 +357,7 @@ func TestStatusHandler_OfflineToOnline(t *testing.T) {
 		storage.Session(),
 		testfixtures.Config.OnlineThreshold,
 		storage.Profile(),
+		lastSeen,
 		clock,
 	)
 	err = statusService.Ping(session.AccountId, session.Token)
