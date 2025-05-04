@@ -16,23 +16,24 @@ var DefaultConfig = domain.Config{
 	ServerPort:      8080,
 }
 
-func intEnvOrDefault(key string, fallback int) int {
-	if value, ok := os.LookupEnv(key); ok {
-		value, err := strconv.Atoi(value)
-		if err != nil {
-			return fallback
-		}
-		return value
-	}
-	return fallback
-}
-
 func main() {
 	cfg := DefaultConfig
-	flag.IntVar(&cfg.ServerPort, "p", intEnvOrDefault("PORT", 8080), "port to listen on")
-	envOnlineThreshold := time.Duration(intEnvOrDefault("ONLINE_THRESHOLD_MILLIS", 10_000)) * time.Millisecond
-	flag.DurationVar(&cfg.OnlineThreshold, "online-threshold", envOnlineThreshold, "threshold for determining if a user is online")
+	flag.IntVar(&cfg.ServerPort, "p", 8080, "port to listen on")
+	flag.DurationVar(&cfg.OnlineThreshold, "online-threshold", 10*time.Millisecond, "threshold for determining if a user is online")
 	flag.Parse()
+
+	envPort, set := os.LookupEnv("PORT")
+	if set {
+		if envPort, err := strconv.Atoi(envPort); err != nil {
+			cfg.ServerPort = envPort
+		}
+	}
+	envOnlineThresholdMillis, set := os.LookupEnv("ONLINE_THRESHOLD_MILLIS")
+	if set {
+		if envOnlineThresholdMillis, err := strconv.Atoi(envOnlineThresholdMillis); err != nil {
+			cfg.OnlineThreshold = time.Duration(envOnlineThresholdMillis) * time.Millisecond
+		}
+	}
 
 	tokenGen := domain.NewUUIDTokenGenerator()
 	sessionGen := domain.NewUUIDSessionGenerator()
