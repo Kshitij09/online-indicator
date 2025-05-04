@@ -17,8 +17,13 @@ var ErrInvalidSession = errors.New("invalid session")
 
 type SessionDao interface {
 	Create(accountId string) Session
-	Refresh(accountId string)
+	Refresh(accountId string) Session
 	GetBySessionToken(sessionToken string) (Session, bool)
 	GetByAccountId(accountId string) (Session, bool)
 	BatchGetByAccountId([]string) map[string]Session
+}
+
+type LastSeenDao interface {
+	GetLastSeen(accountId string) (int64, error)
+	SetLastSeen(accountId string, lastSeen int64) error
 }

@@ -9,6 +9,7 @@ import (
 type StatusService struct {
 	session         domain.SessionDao
 	profile         domain.ProfileDao
+	lastSeen        domain.LastSeenDao
 	onlineThreshold time.Duration
 	clock           clockwork.Clock
 }
@@ -17,12 +18,14 @@ func NewStatusService(
 	session domain.SessionDao,
 	onlineThreshold time.Duration,
 	profile domain.ProfileDao,
+	lastSeen domain.LastSeenDao,
 	clock clockwork.Clock,
 ) StatusService {
 	return StatusService{
 		session:         session,
 		onlineThreshold: onlineThreshold,
 		profile:         profile,
+		lastSeen:        lastSeen,
 		clock:           clock,
 	}
 }
@@ -35,8 +38,8 @@ func (ctx *StatusService) Ping(accountId, sessionToken string) error {
 	if session.Token != sessionToken {
 		return domain.ErrInvalidSession
 	}
-	ctx.session.Refresh(session.AccountId)
-	return nil
+	session = ctx.session.Refresh(session.AccountId)
+	return ctx.lastSeen.SetLastSeen(accountId, session.RefreshedAt.Unix())
 }
 
 func (ctx *StatusService) Status(accountId string) (domain.ProfileStatus, error) {
