@@ -65,7 +65,7 @@ func TestStatusHandler_Success(t *testing.T) {
 	expectedOnlineMillis := clock.Now().UnixMilli()
 	expectedBody := StatusResponse{
 		Id:         acc.Id,
-		Username:   acc.Name,
+		Name:       acc.Name,
 		IsOnline:   true,
 		LastOnline: &expectedOnlineMillis,
 	}
@@ -130,7 +130,7 @@ func TestStatusHandler_NoLoginAsOffline(t *testing.T) {
 	if body.IsOnline {
 		t.Errorf("account should not be online")
 	}
-	if body.Username == "" || body.Id == "" {
+	if body.Name == "" || body.Id == "" {
 		t.Errorf("account details should not be empty")
 	}
 }
@@ -188,7 +188,7 @@ func TestBatchStatusHandler_Success(t *testing.T) {
 		lastOnlineMillis := clock.Now().UnixMilli()
 		response := StatusResponse{
 			Id:         acc.Id,
-			Username:   acc.Name,
+			Name:       acc.Name,
 			IsOnline:   true,
 			LastOnline: &lastOnlineMillis,
 		}

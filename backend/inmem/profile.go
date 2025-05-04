@@ -24,15 +24,15 @@ func (ctx *ProfileCache) Create(profile domain.Profile) error {
 	if _, exists := ctx.idLookup[profile.UserId]; exists {
 		return domain.ErrProfileAlreadyExists
 	}
-	if profile.Username == "" {
+	if profile.Name == "" {
 		return domain.ErrEmptyName
 	}
 	ctx.idLookup[profile.UserId] = &profile
-	ctx.nameLookup[profile.Username] = &profile
+	ctx.nameLookup[profile.Name] = &profile
 	return nil
 }
 
-func (ctx *ProfileCache) UsernameExists(name string) bool {
+func (ctx *ProfileCache) NameExists(name string) bool {
 	ctx.mu.RLock()
 	defer ctx.mu.RUnlock()
 	_, exists := ctx.nameLookup[name]
