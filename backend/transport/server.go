@@ -32,7 +32,7 @@ func (s *Server) Run(port int) error {
 	login := LoginHandler(s.Storage)
 	router.HandleFunc("POST /login", NewHttpHandler(login, logger))
 	ping := PingHandler(s.Storage, s.config, s.clock)
-	router.HandleFunc("POST /ping", NewHttpHandler(ping, logger))
+	router.HandleFunc(fmt.Sprintf("POST /ping/{%s}", PathId), NewHttpHandler(ping, logger))
 	status := StatusHandler(s.Storage, s.config, s.clock)
 	router.HandleFunc(fmt.Sprintf("GET /status/{%s}", PathId), NewHttpHandler(status, logger))
 	batchStatus := BatchStatusHandler(s.Storage, s.config, s.clock)

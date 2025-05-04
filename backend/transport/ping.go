@@ -29,9 +29,16 @@ func PingHandler(storage domain.Storage, config domain.Config, clock clockwork.C
 		if decodeErr != nil {
 			return apierror.SimpleAPIError(http.StatusBadRequest, fmt.Sprintf("invalid request: %s", decodeErr))
 		}
-		err := service.Ping(req.SessionToken)
+		id := r.PathValue(PathId)
+		if id == "" {
+			return apierror.SimpleAPIError(http.StatusBadRequest, fmt.Sprintf("path parameter '%s' missing", PathId))
+		}
+		err := service.Ping(id, req.SessionToken)
 		if errors.Is(err, domain.ErrSessionNotFound) {
-			return apierror.SimpleAPIError(http.StatusUnauthorized, fmt.Sprintf("session not found"))
+			return apierror.SimpleAPIError(http.StatusUnauthorized, "session not found")
+		}
+		if errors.Is(err, domain.ErrInvalidSession) {
+			return apierror.SimpleAPIError(http.StatusUnauthorized, "invalid session")
 		}
 		if err != nil {
 			return err

@@ -13,10 +13,11 @@ type Session struct {
 }
 
 var ErrSessionNotFound = errors.New("session not found")
+var ErrInvalidSession = errors.New("invalid session")
 
 type SessionDao interface {
 	Create(accountId string) Session
-	Refresh(sessionToken string) bool
+	Refresh(accountId string)
 	GetBySessionToken(sessionToken string) (Session, bool)
 	GetByAccountId(accountId string) (Session, bool)
 	BatchGetByAccountId([]string) map[string]Session

@@ -74,13 +74,11 @@ func (ctx *SessionCache) BatchGetByAccountId(ids []string) map[string]domain.Ses
 	return result
 }
 
-func (ctx *SessionCache) Refresh(sessionToken string) bool {
+func (ctx *SessionCache) Refresh(accountId string) {
 	ctx.mu.Lock()
 	defer ctx.mu.Unlock()
-	session, exists := ctx.sessionTokenLookup[sessionToken]
+	session, exists := ctx.accountIdLookup[accountId]
 	if exists {
 		session.RefreshedAt = ctx.clock.Now()
-		return true
 	}
-	return false
 }
