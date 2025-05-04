@@ -12,8 +12,8 @@ import (
 )
 
 type LoginRequest struct {
-	Id    string `json:"id"`
-	Token string `json:"token"`
+	Id     string `json:"id"`
+	ApiKey string `json:"apikey"`
 }
 
 type LoginResponse struct {
@@ -36,7 +36,7 @@ func LoginHandler(storage domain.Storage) handlers.Handler {
 			return apierror.SimpleAPIError(http.StatusBadRequest, "id is required")
 		}
 
-		session, err := service.Login(req.Id, req.Token)
+		session, err := service.Login(req.Id, req.ApiKey)
 		if errors.Is(err, domain.ErrAccountNotFound) {
 			return apierror.SimpleAPIError(http.StatusNotFound, "account does not exist")
 		}

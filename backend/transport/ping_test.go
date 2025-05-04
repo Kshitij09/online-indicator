@@ -51,7 +51,7 @@ func TestPingHandler_OK(t *testing.T) {
 		t.Error(err)
 	}
 	loginService := service.NewAuthService(storage.Auth(), storage.Session(), storage.Profile())
-	session, err := loginService.Login(staticGen.StubValue, account.Token)
+	session, err := loginService.Login(staticGen.StubValue, account.ApiKey)
 	if err != nil {
 		t.Error(err)
 	}
