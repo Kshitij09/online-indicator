@@ -14,8 +14,6 @@ import (
 	"strings"
 )
 
-var PathId = "id"
-
 type StatusResponse struct {
 	Id         string `json:"id"`
 	Name       string `json:"name"`
