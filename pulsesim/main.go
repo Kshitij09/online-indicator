@@ -41,11 +41,11 @@ func main() {
 
 	for i := 0; i < cfg.NumUsers; i++ {
 		name := faker.Name()
-		loginResponse, err := registerAndLogin(name, cfg.BaseUrl)
+		id, loginResponse, err := registerAndLogin(name, cfg.BaseUrl)
 		if err != nil {
 			panic(err)
 		}
-		users[i] = user{name, loginResponse.SessionID}
+		users[i] = user{id, name, loginResponse.SessionToken}
 		log.Printf("%s: registered and logged in\n", name)
 	}
 
@@ -67,7 +67,7 @@ func main() {
 				interval := 5 + random.Intn(11) // 5 to 15 seconds
 
 				// Ping the server
-				err := Ping(user.SessionId, cfg.BaseUrl)
+				err := Ping(user.Id, user.SessionId, cfg.BaseUrl)
 				if err != nil {
 					log.Printf("%s ping failed: %v\n", user.Name, err)
 				} else {
@@ -83,22 +83,23 @@ func main() {
 	wg.Wait()
 }
 
-func registerAndLogin(name string, baseUrl string) (LoginResponse, error) {
+func registerAndLogin(name string, baseUrl string) (string, LoginResponse, error) {
 
 	registerResponse, err := Register(name, baseUrl)
 	if err != nil {
-		return LoginResponse{}, err
+		return "", LoginResponse{}, err
 	}
 
-	loginResponse, err := Login(registerResponse.Id, registerResponse.Token, baseUrl)
+	loginResponse, err := Login(registerResponse.Id, registerResponse.ApiKey, baseUrl)
 	if err != nil {
-		return LoginResponse{}, err
+		return "", LoginResponse{}, err
 	}
 
-	return loginResponse, nil
+	return registerResponse.Id, loginResponse, nil
 }
 
 type user struct {
+	Id        string
 	Name      string
 	SessionId string
 }

@@ -11,8 +11,8 @@ type registerRequest struct {
 }
 
 type RegisterResponse struct {
-	Token string `json:"token"`
-	Id    string `json:"id"`
+	ApiKey string `json:"apiKey"`
+	Id     string `json:"id"`
 }
 
 func Register(name string, baseUrl string) (RegisterResponse, error) {

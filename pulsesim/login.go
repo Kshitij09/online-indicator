@@ -7,18 +7,18 @@ import (
 )
 
 type loginRequest struct {
-	Id    string `json:"id"`
-	Token string `json:"token"`
+	Id     string `json:"id"`
+	ApiKey string `json:"apiKey"`
 }
 
 type LoginResponse struct {
-	SessionID string `json:"sessionId"`
+	SessionToken string `json:"sessionToken"`
 }
 
 func Login(id string, token string, baseUrl string) (LoginResponse, error) {
 	req := loginRequest{
-		Id:    id,
-		Token: token,
+		Id:     id,
+		ApiKey: token,
 	}
 
 	var body bytes.Buffer
