@@ -21,15 +21,7 @@ func TestPingHandler_Unauthorized(t *testing.T) {
 	handler := NewHttpHandler(PingHandler(storage, testfixtures.Config, clock))
 	t.Run("session token not found", func(t *testing.T) {
 		recorder := httptest.NewRecorder()
-
-		body := PingRequest{
-			SessionToken: "non_existent_token",
-		}
-		req, err := testfixtures.CreateRequest(http.MethodPost, "/ping", body)
-		if err != nil {
-			t.Error(err)
-		}
-		req.SetPathValue(PathId, "random") // invalid account id
+		req := createPingRequest("random", "non_existent_token")
 		handler(recorder, req)
 		result := recorder.Result()
 		expectedStatusCode := http.StatusUnauthorized
@@ -55,14 +47,8 @@ func TestPingHandler_Unauthorized(t *testing.T) {
 		handler := NewHttpHandler(PingHandler(storage, testfixtures.Config, clock))
 		recorder := httptest.NewRecorder()
 
-		body := PingRequest{
-			SessionToken: "invalid_token",
-		}
-		req, err := testfixtures.CreateRequest(http.MethodPost, "/ping", body)
-		if err != nil {
-			t.Error(err)
-		}
-		req.SetPathValue(PathId, account.Id) // valid account id
+		// with valid account id and invalid session token
+		req := createPingRequest(account.Id, "invalid_token")
 
 		handler(recorder, req)
 
@@ -86,20 +72,8 @@ func TestPingHandler_BadRequest(t *testing.T) {
 
 	recorder := httptest.NewRecorder()
 
-	body := PingRequest{
-		SessionToken: "123",
-	}
-	req, err := testfixtures.CreateRequest(http.MethodPost, "/ping", body)
-	if err != nil {
-		t.Error(err)
-	}
+	req := createPingRequest("", "any_token")
 	handler(recorder, req)
-	if err != nil {
-		t.Error(err)
-	}
-
-	handler(recorder, req)
-
 	result := recorder.Result()
 	expectedStatusCode := http.StatusBadRequest
 	if result.StatusCode != expectedStatusCode {
@@ -133,12 +107,7 @@ func TestPingHandler_OK(t *testing.T) {
 	handler := NewHttpHandler(PingHandler(storage, testfixtures.Config, clock))
 	recorder := httptest.NewRecorder()
 
-	body := PingRequest{SessionToken: session.Token}
-	req, err := testfixtures.CreateRequest(http.MethodPost, "/ping", body)
-	if err != nil {
-		t.Error(err)
-	}
-	req.SetPathValue(PathId, session.AccountId)
+	req := createPingRequest(session.AccountId, session.Token)
 	handler(recorder, req)
 
 	result := recorder.Result()
@@ -150,4 +119,11 @@ func TestPingHandler_OK(t *testing.T) {
 		t.Logf("error: %s", firstMsg)
 		t.Errorf("expected statusCode %d, got %d", expectedStatusCode, result.StatusCode)
 	}
+}
+
+func createPingRequest(accountId, sessionToken string) *http.Request {
+	req := httptest.NewRequest("POST", "/ping", nil)
+	req.Header.Set(HeaderSessionToken, sessionToken)
+	req.SetPathValue(PathId, accountId)
+	return req
 }

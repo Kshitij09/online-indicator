@@ -1,7 +1,6 @@
 package transport
 
 import (
-	"encoding/json"
 	"errors"
 	"fmt"
 	"github.com/Kshitij09/online-indicator/domain"
@@ -24,16 +23,15 @@ func PingHandler(storage domain.Storage, config domain.Config, clock clockwork.C
 		clock,
 	)
 	return func(w http.ResponseWriter, r *http.Request) error {
-		var req PingRequest
-		decodeErr := json.NewDecoder(r.Body).Decode(&req)
-		if decodeErr != nil {
-			return apierror.SimpleAPIError(http.StatusBadRequest, fmt.Sprintf("invalid request: %s", decodeErr))
+		sessionToken := r.Header.Get(HeaderSessionToken)
+		if sessionToken == "" {
+			return apierror.SimpleAPIError(http.StatusUnauthorized, fmt.Sprintf("header '%s' is missing", HeaderSessionToken))
 		}
 		id := r.PathValue(PathId)
 		if id == "" {
 			return apierror.SimpleAPIError(http.StatusBadRequest, fmt.Sprintf("path parameter '%s' missing", PathId))
 		}
-		err := service.Ping(id, req.SessionToken)
+		err := service.Ping(id, sessionToken)
 		if errors.Is(err, domain.ErrSessionNotFound) {
 			return apierror.SimpleAPIError(http.StatusUnauthorized, "session not found")
 		}
