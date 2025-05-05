@@ -1,31 +1,19 @@
 package transport
 
 import (
-	"context"
 	"fmt"
-	"github.com/Kshitij09/online-indicator/domain"
-	"github.com/Kshitij09/online-indicator/redisstore"
+	"github.com/Kshitij09/online-indicator/di"
 	"github.com/Kshitij09/online-indicator/transport/middlewares"
-	"github.com/jonboulle/clockwork"
-	"github.com/redis/go-redis/v9"
 	"log"
 	"net/http"
 )
 
 type Server struct {
-	domain.Storage
-	config      domain.Config
-	clock       clockwork.Clock
-	lastSeenDao domain.LastSeenDao
+	handlers di.HandlerContainer
 }
 
-func NewServer(storage domain.Storage, config domain.Config, clock clockwork.Clock, client *redis.Client) *Server {
-	return &Server{
-		Storage:     storage,
-		config:      config,
-		clock:       clock,
-		lastSeenDao: redisstore.LastSeenDao(client, context.Background(), config.OnlineThreshold),
-	}
+func NewServer(handlers di.HandlerContainer) Server {
+	return Server{handlers}
 }
 func (s *Server) Run(port int) error {
 	listAddr := fmt.Sprintf(":%d", port)
@@ -35,16 +23,11 @@ func (s *Server) Run(port int) error {
 		_, err := w.Write([]byte("OK"))
 		return err
 	}, logger))
-	register := RegisterHandler(s.Storage)
-	router.HandleFunc("POST /register", NewHttpHandler(register, logger))
-	login := LoginHandler(s.Storage)
-	router.HandleFunc("POST /login", NewHttpHandler(login, logger))
-	ping := PingHandler(s.Storage, s.config, s.clock, s.lastSeenDao)
-	router.HandleFunc(fmt.Sprintf("POST /ping/{%s}", PathId), NewHttpHandler(ping, logger))
-	status := StatusHandler(s.Storage, s.config, s.clock, s.lastSeenDao)
-	router.HandleFunc(fmt.Sprintf("GET /status/{%s}", PathId), NewHttpHandler(status, logger))
-	batchStatus := BatchStatusHandler(s.Storage, s.config, s.clock, s.lastSeenDao)
-	router.HandleFunc("POST /batch/status", NewHttpHandler(batchStatus, logger))
+	router.HandleFunc("POST /register", NewHttpHandler(s.handlers.Register, logger))
+	router.HandleFunc("POST /login", NewHttpHandler(s.handlers.Login, logger))
+	router.HandleFunc(fmt.Sprintf("POST /ping/{%s}", PathId), NewHttpHandler(s.handlers.Ping, logger))
+	router.HandleFunc(fmt.Sprintf("GET /status/{%s}", PathId), NewHttpHandler(s.handlers.Status, logger))
+	router.HandleFunc("POST /batch/status", NewHttpHandler(s.handlers.BatchStatus, logger))
 	server := &http.Server{
 		Addr:    listAddr,
 		Handler: router,

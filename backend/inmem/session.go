@@ -14,7 +14,7 @@ type SessionCache struct {
 	clock              clockwork.Clock
 }
 
-func NewSessionCache(generator domain.SessionGenerator, clock clockwork.Clock) *SessionCache {
+func NewSessionDao(generator domain.SessionGenerator, clock clockwork.Clock) *SessionCache {
 	return &SessionCache{
 		sessionTokenLookup: make(map[string]*domain.Session),
 		accountIdLookup:    make(map[string]*domain.Session),

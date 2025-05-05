@@ -19,8 +19,8 @@ func NewStorage(
 ) *Storage {
 	return &Storage{
 		auth:    NewAuthDao(apiKeyGen, idGen),
-		session: NewSessionCache(sessionGen, clock),
-		profile: NewProfileCache(),
+		session: NewSessionDao(sessionGen, clock),
+		profile: NewProfileDao(),
 	}
 }
 

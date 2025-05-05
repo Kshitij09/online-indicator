@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/Kshitij09/online-indicator/domain"
+	"github.com/Kshitij09/online-indicator/domain/service"
 	"github.com/Kshitij09/online-indicator/domain/stubs"
 	"github.com/Kshitij09/online-indicator/inmem"
 	"github.com/Kshitij09/online-indicator/transport/apierror"
@@ -24,7 +25,8 @@ func TestLoginHandler_Success(t *testing.T) {
 	idGenerator := stubs.StaticGenerator{StubValue: body.Id}
 	fakeClock := clockwork.NewFakeClock()
 	storage := inmem.NewStorage(staticGenerator, staticGenerator, fakeClock, idGenerator)
-	handler := NewHttpHandler(LoginHandler(storage))
+	svc := service.NewAuthService(storage.Auth(), storage.Session(), storage.Profile())
+	handler := NewHttpHandler(LoginHandler(svc))
 
 	existing := domain.Account{Name: body.Id}
 	_, err = storage.Auth().Create(existing)
@@ -59,7 +61,8 @@ func TestLoginHandler_InvalidCredentials(t *testing.T) {
 	idGenerator := stubs.StaticGenerator{StubValue: body.Id}
 	fakeClock := clockwork.NewFakeClock()
 	storage := inmem.NewStorage(staticGenerator, staticGenerator, fakeClock, idGenerator)
-	handler := NewHttpHandler(LoginHandler(storage))
+	svc := service.NewAuthService(storage.Auth(), storage.Session(), storage.Profile())
+	handler := NewHttpHandler(LoginHandler(svc))
 
 	existing := domain.Account{Name: "John Doe"}
 	_, err = storage.Auth().Create(existing)
@@ -160,6 +163,7 @@ func loginHandler(
 	idGen domain.IDGenerator,
 ) http.HandlerFunc {
 	storage := inmem.NewStorage(apiKeyGen, sessionGen, clock, idGen)
-	register := LoginHandler(storage)
+	svc := service.NewAuthService(storage.Auth(), storage.Session(), storage.Profile())
+	register := LoginHandler(svc)
 	return NewHttpHandler(register)
 }

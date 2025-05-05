@@ -1,45 +1,26 @@
 package service
 
 import (
+	"errors"
 	"github.com/Kshitij09/online-indicator/domain"
-	"github.com/jonboulle/clockwork"
-	"time"
 )
 
 type StatusService struct {
-	session         domain.SessionDao
-	profile         domain.ProfileDao
-	lastSeen        domain.LastSeenDao
-	onlineThreshold time.Duration
-	clock           clockwork.Clock
+	session  domain.SessionDao
+	profile  domain.ProfileDao
+	lastSeen domain.LastSeenDao
 }
 
 func NewStatusService(
 	session domain.SessionDao,
-	onlineThreshold time.Duration,
 	profile domain.ProfileDao,
 	lastSeen domain.LastSeenDao,
-	clock clockwork.Clock,
 ) StatusService {
 	return StatusService{
-		session:         session,
-		onlineThreshold: onlineThreshold,
-		profile:         profile,
-		lastSeen:        lastSeen,
-		clock:           clock,
+		session:  session,
+		profile:  profile,
+		lastSeen: lastSeen,
 	}
-}
-
-func (ctx *StatusService) Ping(accountId, sessionToken string) error {
-	session, exists := ctx.session.GetByAccountId(accountId)
-	if !exists {
-		return domain.ErrSessionNotFound
-	}
-	if session.Token != sessionToken {
-		return domain.ErrInvalidSession
-	}
-	session = ctx.session.Refresh(session.AccountId)
-	return ctx.lastSeen.SetLastSeen(accountId, session.RefreshedAt.Unix())
 }
 
 func (ctx *StatusService) Status(accountId string) (domain.ProfileStatus, error) {
@@ -53,7 +34,7 @@ func (ctx *StatusService) Status(accountId string) (domain.ProfileStatus, error)
 	}
 	profileStatus := domain.ProfileStatus{
 		Profile:    profile,
-		IsOnline:   ctx.isSessionOnline(session.RefreshedAt),
+		IsOnline:   ctx.isUserOnline(session.AccountId),
 		LastOnline: session.RefreshedAt,
 	}
 	return profileStatus, nil
@@ -68,7 +49,7 @@ func (ctx *StatusService) BatchStatus(ids []string) map[string]domain.ProfileSta
 		if exists {
 			profileStatus := domain.ProfileStatus{
 				Profile:    profile,
-				IsOnline:   ctx.isSessionOnline(session.RefreshedAt),
+				IsOnline:   ctx.isUserOnline(session.AccountId),
 				LastOnline: session.RefreshedAt,
 			}
 			merged[userId] = profileStatus
@@ -77,6 +58,7 @@ func (ctx *StatusService) BatchStatus(ids []string) map[string]domain.ProfileSta
 	return merged
 }
 
-func (ctx *StatusService) isSessionOnline(lastRefresh time.Time) bool {
-	return ctx.clock.Now().Sub(lastRefresh) <= ctx.onlineThreshold
+func (ctx *StatusService) isUserOnline(accountId string) bool {
+	_, err := ctx.lastSeen.GetLastSeen(accountId)
+	return !errors.Is(err, domain.ErrSessionExpired)
 }

@@ -14,7 +14,7 @@ import (
 func TestSessionCache_CreateAndGet(t *testing.T) {
 	staticGen := stubs.StaticGenerator{StubValue: "123"}
 	clock := clockwork.NewFakeClock()
-	cache := NewSessionCache(staticGen, clock)
+	cache := NewSessionDao(staticGen, clock)
 	expectedSession := cache.Create("abc")
 	session, exists := cache.GetBySessionToken("non-existent")
 	if exists {
@@ -53,7 +53,7 @@ func TestSessionCache_CreateAndGet(t *testing.T) {
 func TestSessionCache_BatchGetByAccountId(t *testing.T) {
 	staticGen := stubs.StaticGenerator{StubValue: "123"}
 	clock := clockwork.NewFakeClock()
-	cache := NewSessionCache(staticGen, clock)
+	cache := NewSessionDao(staticGen, clock)
 	expected := make(map[string]domain.Session)
 	for i := 0; i < 50; i++ {
 		accountId := fmt.Sprintf("test%d", i)

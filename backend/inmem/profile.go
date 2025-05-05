@@ -11,7 +11,7 @@ type ProfileCache struct {
 	nameLookup map[string]*domain.Profile
 }
 
-func NewProfileCache() domain.ProfileDao {
+func NewProfileDao() domain.ProfileDao {
 	return &ProfileCache{
 		idLookup:   make(map[string]*domain.Profile),
 		nameLookup: make(map[string]*domain.Profile),

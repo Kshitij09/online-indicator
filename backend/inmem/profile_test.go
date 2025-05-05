@@ -11,7 +11,7 @@ import (
 )
 
 func TestProfileCache_Create(t *testing.T) {
-	cache := NewProfileCache()
+	cache := NewProfileDao()
 	expected := domain.Profile{UserId: "1", Name: "test1"}
 	err := cache.Create(expected)
 	if err != nil {
@@ -27,7 +27,7 @@ func TestProfileCache_Create(t *testing.T) {
 }
 
 func TestProfileCache_CreateDuplicate(t *testing.T) {
-	cache := NewProfileCache()
+	cache := NewProfileDao()
 	expected := domain.Profile{UserId: "1", Name: "test1"}
 	err := cache.Create(expected)
 	if err != nil {
@@ -40,7 +40,7 @@ func TestProfileCache_CreateDuplicate(t *testing.T) {
 }
 
 func TestProfileCache_NameExists(t *testing.T) {
-	cache := NewProfileCache()
+	cache := NewProfileDao()
 	expected := domain.Profile{UserId: "1", Name: "test1"}
 	if cache.NameExists(expected.UserId) != false {
 		t.Errorf("Profile should not exist initially")
@@ -55,7 +55,7 @@ func TestProfileCache_NameExists(t *testing.T) {
 }
 
 func TestProfileCache_BatchGetByUserId(t *testing.T) {
-	cache := NewProfileCache()
+	cache := NewProfileDao()
 	expected := make(map[string]domain.Profile)
 	for i := 0; i < 50; i++ {
 		userId := strconv.Itoa(i)

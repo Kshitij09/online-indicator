@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"github.com/Kshitij09/online-indicator/domain"
+	"github.com/Kshitij09/online-indicator/domain/service"
 	"github.com/Kshitij09/online-indicator/domain/stubs"
 	"github.com/Kshitij09/online-indicator/inmem"
 	"github.com/Kshitij09/online-indicator/transport/apierror"
@@ -49,7 +50,8 @@ func TestRegisterHandler_AccountExists(t *testing.T) {
 	staticGenerator := stubs.StaticGenerator{StubValue: "1"}
 	fakeClock := clockwork.NewFakeClock()
 	storage := inmem.NewStorage(staticGenerator, staticGenerator, fakeClock, staticGenerator)
-	register := RegisterHandler(storage)
+	svc := service.NewAuthService(storage.Auth(), storage.Session(), storage.Profile())
+	register := RegisterHandler(svc)
 	handler := NewHttpHandler(register)
 
 	existing := domain.Account{Name: "test"}
@@ -129,6 +131,7 @@ func registerHandler(
 	idGen domain.IDGenerator,
 ) http.HandlerFunc {
 	storage := inmem.NewStorage(apiKeyGen, sessionGen, clock, idGen)
-	register := RegisterHandler(storage)
+	svc := service.NewAuthService(storage.Auth(), storage.Session(), storage.Profile())
+	register := RegisterHandler(svc)
 	return NewHttpHandler(register)
 }

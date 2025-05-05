@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/Kshitij09/online-indicator/domain"
-	service2 "github.com/Kshitij09/online-indicator/domain/service"
+	"github.com/Kshitij09/online-indicator/domain/service"
 	"github.com/Kshitij09/online-indicator/transport/apierror"
 	"github.com/Kshitij09/online-indicator/transport/handlers"
 	"net/http"
@@ -20,8 +20,7 @@ type RegisterResponse struct {
 	Id     string `json:"id"`
 }
 
-func RegisterHandler(storage domain.Storage) handlers.Handler {
-	service := service2.NewAuthService(storage.Auth(), storage.Session(), storage.Profile())
+func RegisterHandler(svc service.AuthService) handlers.Handler {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		if r.Body == http.NoBody {
 			return apierror.SimpleAPIError(http.StatusBadRequest, "Request Body is missing")
@@ -33,7 +32,7 @@ func RegisterHandler(storage domain.Storage) handlers.Handler {
 		}
 
 		acc := domain.Account{Name: req.Name}
-		created, err := service.CreateAccount(acc)
+		created, err := svc.CreateAccount(acc)
 		if errors.Is(err, domain.ErrAccountAlreadyExists) {
 			return apierror.SimpleAPIError(http.StatusConflict, "account already exists")
 		}
