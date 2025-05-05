@@ -5,6 +5,7 @@ import (
 	"flag"
 	"github.com/Kshitij09/online-indicator/di"
 	"github.com/Kshitij09/online-indicator/domain"
+	"github.com/Kshitij09/online-indicator/domain/service"
 	"github.com/Kshitij09/online-indicator/inmem"
 	"github.com/Kshitij09/online-indicator/redisstore"
 	"github.com/Kshitij09/online-indicator/transport"
@@ -26,7 +27,6 @@ func main() {
 	sessionGen := domain.NewUUIDSessionGenerator()
 	realClock := clockwork.NewRealClock()
 	idGen := domain.NewSeqIdGenerator()
-	storage := inmem.NewStorage(apiKeyGen, sessionGen, realClock, idGen)
 	redisClient := redis.NewClient(&redis.Options{
 		Addr:     cfg.RedisAddress,
 		Password: "", // No password set
@@ -39,17 +39,17 @@ func main() {
 		Profile:  inmem.NewProfileCache(),
 		LastSeen: redisstore.LastSeenDao(redisClient, context.Background(), cfg.OnlineThreshold),
 	}
-	//services := di.ServiceContainer{
-	//	Status: service.NewStatusService(db.Session, cfg.OnlineThreshold, db.Profile, db.LastSeen, realClock),
-	//	Auth:   service.NewAuthService(db.Auth, db.Session, db.Profile),
-	//	Ping:   service.NewPingService(db.Session, db.LastSeen),
-	//}
+	svcs := di.ServiceContainer{
+		Status: service.NewStatusService(db.Session, cfg.OnlineThreshold, db.Profile, db.LastSeen, realClock),
+		Auth:   service.NewAuthService(db.Auth, db.Session, db.Profile),
+		Ping:   service.NewPingService(db.Session, db.LastSeen),
+	}
 	handlers := di.HandlerContainer{
-		Register:    transport.RegisterHandler(storage),
-		Login:       transport.LoginHandler(storage),
-		Ping:        transport.PingHandler(storage, db.LastSeen),
-		Status:      transport.StatusHandler(storage, cfg, realClock, db.LastSeen),
-		BatchStatus: transport.BatchStatusHandler(storage, cfg, realClock, db.LastSeen),
+		Register:    transport.RegisterHandler(svcs.Auth),
+		Login:       transport.LoginHandler(svcs.Auth),
+		Ping:        transport.PingHandler(svcs.Ping),
+		Status:      transport.StatusHandler(svcs.Status),
+		BatchStatus: transport.BatchStatusHandler(svcs.Status),
 	}
 	server := transport.NewServer(handlers)
 	err := server.Run(cfg.ServerPort)

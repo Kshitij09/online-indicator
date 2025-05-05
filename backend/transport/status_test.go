@@ -38,7 +38,8 @@ func TestStatusHandler_Success(t *testing.T) {
 		t.Error(err)
 	}
 
-	handler := NewHttpHandler(StatusHandler(storage, testfixtures.Config, clock, lastSeen))
+	svc := service.NewStatusService(storage.Session(), testfixtures.Config.OnlineThreshold, storage.Profile(), lastSeen, clock)
+	handler := NewHttpHandler(StatusHandler(svc))
 
 	req, err := http.NewRequest(http.MethodGet, "/status", nil)
 	if err != nil {
@@ -77,7 +78,8 @@ func TestStatusHandler_AccountNotFound(t *testing.T) {
 	clock := clockwork.NewFakeClock()
 	storage := inmem.NewStorage(staticGen, staticGen, clock, staticGen)
 	lastSeen := stubs.StubLastSeenDao{}
-	handler := NewHttpHandler(StatusHandler(storage, testfixtures.Config, clock, lastSeen))
+	svc := service.NewStatusService(storage.Session(), testfixtures.Config.OnlineThreshold, storage.Profile(), lastSeen, clock)
+	handler := NewHttpHandler(StatusHandler(svc))
 
 	req, err := http.NewRequest(http.MethodGet, "/status", nil)
 	if err != nil {
@@ -105,7 +107,8 @@ func TestStatusHandler_NoLoginAsOffline(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	handler := NewHttpHandler(StatusHandler(storage, testfixtures.Config, clock, lastSeen))
+	svc := service.NewStatusService(storage.Session(), testfixtures.Config.OnlineThreshold, storage.Profile(), lastSeen, clock)
+	handler := NewHttpHandler(StatusHandler(svc))
 
 	req, err := http.NewRequest(http.MethodGet, "/status", nil)
 	if err != nil {
@@ -138,7 +141,8 @@ func TestStatusHandler_MissingAccountId(t *testing.T) {
 	clock := clockwork.NewFakeClock()
 	storage := inmem.NewStorage(staticGen, staticGen, clock, staticGen)
 	lastSeen := stubs.StubLastSeenDao{}
-	handler := NewHttpHandler(StatusHandler(storage, testfixtures.Config, clock, lastSeen))
+	svc := service.NewStatusService(storage.Session(), testfixtures.Config.OnlineThreshold, storage.Profile(), lastSeen, clock)
+	handler := NewHttpHandler(StatusHandler(svc))
 
 	req, err := http.NewRequest(http.MethodGet, "/status", nil)
 	if err != nil {
@@ -190,7 +194,8 @@ func TestBatchStatusHandler_Success(t *testing.T) {
 		expected = append(expected, response)
 	}
 
-	handler := NewHttpHandler(BatchStatusHandler(storage, testfixtures.Config, clock, lastSeen))
+	svc := service.NewStatusService(storage.Session(), testfixtures.Config.OnlineThreshold, storage.Profile(), lastSeen, clock)
+	handler := NewHttpHandler(BatchStatusHandler(svc))
 
 	reqBody := BatchStatusRequest{Ids: accIds}
 	req, err := testfixtures.CreateRequest(http.MethodPost, "/batch-status", reqBody)
@@ -246,7 +251,8 @@ func TestStatusHandler_OnlineToOfflineAfterThreshold(t *testing.T) {
 		t.Error(err)
 	}
 
-	handler := NewHttpHandler(StatusHandler(storage, testfixtures.Config, clock, lastSeen))
+	svc := service.NewStatusService(storage.Session(), testfixtures.Config.OnlineThreshold, storage.Profile(), lastSeen, clock)
+	handler := NewHttpHandler(StatusHandler(svc))
 
 	// Verify online status
 	req, err := http.NewRequest(http.MethodGet, "/status", nil)
@@ -313,7 +319,8 @@ func TestStatusHandler_OfflineToOnline(t *testing.T) {
 	// Advance time beyond initial ping by logic
 	clock.Advance(testfixtures.Config.OnlineThreshold + 1)
 
-	handler := NewHttpHandler(StatusHandler(storage, testfixtures.Config, clock, lastSeen))
+	svc := service.NewStatusService(storage.Session(), testfixtures.Config.OnlineThreshold, storage.Profile(), lastSeen, clock)
+	handler := NewHttpHandler(StatusHandler(svc))
 
 	// Verify offline status
 	req, err := http.NewRequest(http.MethodGet, "/status", nil)

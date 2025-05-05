@@ -5,10 +5,9 @@ import (
 	"errors"
 	"fmt"
 	"github.com/Kshitij09/online-indicator/domain"
-	service2 "github.com/Kshitij09/online-indicator/domain/service"
+	"github.com/Kshitij09/online-indicator/domain/service"
 	"github.com/Kshitij09/online-indicator/transport/apierror"
 	"github.com/Kshitij09/online-indicator/transport/handlers"
-	"github.com/jonboulle/clockwork"
 	"net/http"
 	"sort"
 	"strings"
@@ -28,20 +27,13 @@ type BatchStatusResponse struct {
 	Items []StatusResponse `json:"items"`
 }
 
-func StatusHandler(storage domain.Storage, config domain.Config, clock clockwork.Clock, lastSeen domain.LastSeenDao) handlers.Handler {
-	service := service2.NewStatusService(
-		storage.Session(),
-		config.OnlineThreshold,
-		storage.Profile(),
-		lastSeen,
-		clock,
-	)
+func StatusHandler(svc service.StatusService) handlers.Handler {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		accountId := r.PathValue(PathId)
 		if accountId == "" {
 			return apierror.SimpleAPIError(http.StatusBadRequest, fmt.Sprintf("path parameter '%s' missing", PathId))
 		}
-		profileStatus, err := service.Status(accountId)
+		profileStatus, err := svc.Status(accountId)
 		if errors.Is(err, domain.ErrAccountNotFound) {
 			return apierror.SimpleAPIError(http.StatusNotFound, fmt.Sprintf("account with id '%s' not found", accountId))
 		}
@@ -50,14 +42,7 @@ func StatusHandler(storage domain.Storage, config domain.Config, clock clockwork
 	}
 }
 
-func BatchStatusHandler(storage domain.Storage, config domain.Config, clock clockwork.Clock, lastSeen domain.LastSeenDao) handlers.Handler {
-	service := service2.NewStatusService(
-		storage.Session(),
-		config.OnlineThreshold,
-		storage.Profile(),
-		lastSeen,
-		clock,
-	)
+func BatchStatusHandler(svc service.StatusService) handlers.Handler {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		request := BatchStatusRequest{}
 		err := json.NewDecoder(r.Body).Decode(&request)
@@ -65,7 +50,7 @@ func BatchStatusHandler(storage domain.Storage, config domain.Config, clock cloc
 			return apierror.SimpleAPIError(http.StatusBadRequest, "invalid request body")
 		}
 		response := BatchStatusResponse{}
-		statuses := service.BatchStatus(request.Ids)
+		statuses := svc.BatchStatus(request.Ids)
 		items := toTransportItems(statuses)
 		response.Items = items
 		return json.NewEncoder(w).Encode(response)
