@@ -3,6 +3,7 @@ package redisstore
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/Kshitij09/online-indicator/domain"
 	"github.com/redis/go-redis/v9"
 	"time"
@@ -31,5 +32,9 @@ func (ctx lastSeenStorage) GetLastSeen(accountId string) (int64, error) {
 }
 
 func (ctx lastSeenStorage) SetLastSeen(accountId string, lastSeen int64) error {
-	return ctx.client.Set(ctx.ctx, accountId, lastSeen, ctx.onlineThreshold).Err()
+	err := ctx.client.Set(ctx.ctx, accountId, lastSeen, ctx.onlineThreshold).Err()
+	if err != nil {
+		return err
+	}
+	return ctx.client.Set(ctx.ctx, fmt.Sprintf("shadow_%s", accountId), lastSeen, ctx.onlineThreshold*3).Err()
 }
