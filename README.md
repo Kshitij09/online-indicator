@@ -2,11 +2,15 @@
 
 ![frontend](docs/v0-dashboard.png)
 
-## v1 requirements
+## v1 requirements (✅ Done)
+
+![architecture](docs/v1-architecture.svg)
 
 * Use redis for storing the userId to active session mapping
 * Configure redis ttl for each entry which can be later
   observed for communicating the status
+
+For a detailed overview, please refer to the [v1 documentation](docs/v1-docs.md).
 
 ## v0 requirements (✅ Done)
 
