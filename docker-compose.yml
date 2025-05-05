@@ -4,6 +4,8 @@ services:
       context: ./backend
       args:
         GOARCH: ${GOARCH:-amd64}
+    environment:
+      - REDIS_ADDRESS=redis:6379
     ports:
       - "8080:8080"
     networks:
