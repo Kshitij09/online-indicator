@@ -14,6 +14,7 @@ type Session struct {
 
 var ErrSessionNotFound = errors.New("session not found")
 var ErrInvalidSession = errors.New("invalid session")
+var ErrSessionExpired = errors.New("session expired")
 
 type SessionDao interface {
 	Create(accountId string) Session

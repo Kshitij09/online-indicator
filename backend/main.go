@@ -40,7 +40,7 @@ func main() {
 		LastSeen: redisstore.LastSeenDao(redisClient, context.Background(), cfg.OnlineThreshold),
 	}
 	svcs := di.ServiceContainer{
-		Status: service.NewStatusService(db.Session, cfg.OnlineThreshold, db.Profile, db.LastSeen, realClock),
+		Status: service.NewStatusService(db.Session, db.Profile, db.LastSeen),
 		Auth:   service.NewAuthService(db.Auth, db.Session, db.Profile),
 		Ping:   service.NewPingService(db.Session, db.LastSeen),
 	}

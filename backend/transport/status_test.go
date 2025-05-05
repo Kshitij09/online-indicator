@@ -32,13 +32,13 @@ func TestStatusHandler_Success(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	pingService := service.NewPingService(storage.Session(), lastSeen)
+	pingService := service.NewPingService(storage.Session(), &lastSeen)
 	err = pingService.Ping(session.AccountId, session.Token)
 	if err != nil {
 		t.Error(err)
 	}
 
-	svc := service.NewStatusService(storage.Session(), testfixtures.Config.OnlineThreshold, storage.Profile(), lastSeen, clock)
+	svc := service.NewStatusService(storage.Session(), storage.Profile(), &lastSeen)
 	handler := NewHttpHandler(StatusHandler(svc))
 
 	req, err := http.NewRequest(http.MethodGet, "/status", nil)
@@ -78,7 +78,7 @@ func TestStatusHandler_AccountNotFound(t *testing.T) {
 	clock := clockwork.NewFakeClock()
 	storage := inmem.NewStorage(staticGen, staticGen, clock, staticGen)
 	lastSeen := stubs.StubLastSeenDao{}
-	svc := service.NewStatusService(storage.Session(), testfixtures.Config.OnlineThreshold, storage.Profile(), lastSeen, clock)
+	svc := service.NewStatusService(storage.Session(), storage.Profile(), &lastSeen)
 	handler := NewHttpHandler(StatusHandler(svc))
 
 	req, err := http.NewRequest(http.MethodGet, "/status", nil)
@@ -107,7 +107,7 @@ func TestStatusHandler_NoLoginAsOffline(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	svc := service.NewStatusService(storage.Session(), testfixtures.Config.OnlineThreshold, storage.Profile(), lastSeen, clock)
+	svc := service.NewStatusService(storage.Session(), storage.Profile(), &lastSeen)
 	handler := NewHttpHandler(StatusHandler(svc))
 
 	req, err := http.NewRequest(http.MethodGet, "/status", nil)
@@ -141,7 +141,7 @@ func TestStatusHandler_MissingAccountId(t *testing.T) {
 	clock := clockwork.NewFakeClock()
 	storage := inmem.NewStorage(staticGen, staticGen, clock, staticGen)
 	lastSeen := stubs.StubLastSeenDao{}
-	svc := service.NewStatusService(storage.Session(), testfixtures.Config.OnlineThreshold, storage.Profile(), lastSeen, clock)
+	svc := service.NewStatusService(storage.Session(), storage.Profile(), &lastSeen)
 	handler := NewHttpHandler(StatusHandler(svc))
 
 	req, err := http.NewRequest(http.MethodGet, "/status", nil)
@@ -179,7 +179,7 @@ func TestBatchStatusHandler_Success(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		pingService := service.NewPingService(storage.Session(), lastSeen)
+		pingService := service.NewPingService(storage.Session(), &lastSeen)
 		err = pingService.Ping(session.AccountId, session.Token)
 		if err != nil {
 			t.Error(err)
@@ -194,7 +194,7 @@ func TestBatchStatusHandler_Success(t *testing.T) {
 		expected = append(expected, response)
 	}
 
-	svc := service.NewStatusService(storage.Session(), testfixtures.Config.OnlineThreshold, storage.Profile(), lastSeen, clock)
+	svc := service.NewStatusService(storage.Session(), storage.Profile(), &lastSeen)
 	handler := NewHttpHandler(BatchStatusHandler(svc))
 
 	reqBody := BatchStatusRequest{Ids: accIds}
@@ -228,7 +228,7 @@ func TestStatusHandler_OnlineToOfflineAfterThreshold(t *testing.T) {
 	staticGen := stubs.StaticGenerator{StubValue: "123"}
 	clock := clockwork.NewFakeClock()
 	storage := inmem.NewStorage(staticGen, staticGen, clock, staticGen)
-	lastSeen := stubs.StubLastSeenDao{}
+	lastSeen := &stubs.StubLastSeenDao{} // allocate on heap to be able to modify later
 	authService := service.NewAuthService(storage.Auth(), storage.Session(), storage.Profile())
 
 	// Register
@@ -251,7 +251,7 @@ func TestStatusHandler_OnlineToOfflineAfterThreshold(t *testing.T) {
 		t.Error(err)
 	}
 
-	svc := service.NewStatusService(storage.Session(), testfixtures.Config.OnlineThreshold, storage.Profile(), lastSeen, clock)
+	svc := service.NewStatusService(storage.Session(), storage.Profile(), lastSeen)
 	handler := NewHttpHandler(StatusHandler(svc))
 
 	// Verify online status
@@ -273,8 +273,7 @@ func TestStatusHandler_OnlineToOfflineAfterThreshold(t *testing.T) {
 		t.Error("user should be online")
 	}
 
-	// Advance time beyond threshold
-	clock.Advance(testfixtures.Config.OnlineThreshold + 1)
+	lastSeen.SetAllOffline()
 
 	// Verify offline status
 	req, err = http.NewRequest(http.MethodGet, "/status", nil)
@@ -316,10 +315,9 @@ func TestStatusHandler_OfflineToOnline(t *testing.T) {
 		t.Error(err)
 	}
 
-	// Advance time beyond initial ping by logic
-	clock.Advance(testfixtures.Config.OnlineThreshold + 1)
+	lastSeen.SetAllOffline()
 
-	svc := service.NewStatusService(storage.Session(), testfixtures.Config.OnlineThreshold, storage.Profile(), lastSeen, clock)
+	svc := service.NewStatusService(storage.Session(), storage.Profile(), &lastSeen)
 	handler := NewHttpHandler(StatusHandler(svc))
 
 	// Verify offline status
@@ -342,7 +340,7 @@ func TestStatusHandler_OfflineToOnline(t *testing.T) {
 	}
 
 	// Ping to set online
-	pingService := service.NewPingService(storage.Session(), lastSeen)
+	pingService := service.NewPingService(storage.Session(), &lastSeen)
 	err = pingService.Ping(session.AccountId, session.Token)
 	if err != nil {
 		t.Error(err)

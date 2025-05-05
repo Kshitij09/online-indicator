@@ -18,7 +18,7 @@ func TestPingHandler_Unauthorized(t *testing.T) {
 	staticGen := stubs.StaticGenerator{StubValue: "expected_token"}
 	storage := inmem.NewStorage(staticGen, staticGen, clock, staticGen)
 	lastSeen := stubs.StubLastSeenDao{}
-	svc := service.NewPingService(storage.Session(), lastSeen)
+	svc := service.NewPingService(storage.Session(), &lastSeen)
 	handler := NewHttpHandler(PingHandler(svc))
 	t.Run("session token not found", func(t *testing.T) {
 		recorder := httptest.NewRecorder()
@@ -45,7 +45,7 @@ func TestPingHandler_Unauthorized(t *testing.T) {
 			t.Error(err)
 		}
 
-		svc := service.NewPingService(storage.Session(), lastSeen)
+		svc := service.NewPingService(storage.Session(), &lastSeen)
 		handler := NewHttpHandler(PingHandler(svc))
 		recorder := httptest.NewRecorder()
 
@@ -71,7 +71,7 @@ func TestPingHandler_BadRequest(t *testing.T) {
 	staticGen := stubs.StaticGenerator{}
 	storage := inmem.NewStorage(staticGen, staticGen, clock, staticGen)
 	lastSeen := stubs.StubLastSeenDao{}
-	svc := service.NewPingService(storage.Session(), lastSeen)
+	svc := service.NewPingService(storage.Session(), &lastSeen)
 	handler := NewHttpHandler(PingHandler(svc))
 
 	recorder := httptest.NewRecorder()
@@ -109,7 +109,7 @@ func TestPingHandler_OK(t *testing.T) {
 		t.Error(err)
 	}
 
-	svc := service.NewPingService(storage.Session(), lastSeen)
+	svc := service.NewPingService(storage.Session(), &lastSeen)
 	handler := NewHttpHandler(PingHandler(svc))
 	recorder := httptest.NewRecorder()
 
