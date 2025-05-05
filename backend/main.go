@@ -5,7 +5,6 @@ import (
 	"flag"
 	"github.com/Kshitij09/online-indicator/di"
 	"github.com/Kshitij09/online-indicator/domain"
-	"github.com/Kshitij09/online-indicator/domain/service"
 	"github.com/Kshitij09/online-indicator/inmem"
 	"github.com/Kshitij09/online-indicator/redisstore"
 	"github.com/Kshitij09/online-indicator/transport"
@@ -40,11 +39,11 @@ func main() {
 		Profile:  inmem.NewProfileCache(),
 		LastSeen: redisstore.LastSeenDao(redisClient, context.Background(), cfg.OnlineThreshold),
 	}
-	services := di.ServiceContainer{
-		Status: service.NewStatusService(db.Session, cfg.OnlineThreshold, db.Profile, db.LastSeen, realClock),
-		Auth:   service.NewAuthService(db.Auth, db.Session, db.Profile),
-		Ping:   service.NewPingService(db.Session, db.LastSeen),
-	}
+	//services := di.ServiceContainer{
+	//	Status: service.NewStatusService(db.Session, cfg.OnlineThreshold, db.Profile, db.LastSeen, realClock),
+	//	Auth:   service.NewAuthService(db.Auth, db.Session, db.Profile),
+	//	Ping:   service.NewPingService(db.Session, db.LastSeen),
+	//}
 	handlers := di.HandlerContainer{
 		Register:    transport.RegisterHandler(storage),
 		Login:       transport.LoginHandler(storage),
@@ -52,7 +51,7 @@ func main() {
 		Status:      transport.StatusHandler(storage, cfg, realClock, db.LastSeen),
 		BatchStatus: transport.BatchStatusHandler(storage, cfg, realClock, db.LastSeen),
 	}
-	server := transport.NewServer(storage, cfg, realClock, redisClient, db, services, handlers)
+	server := transport.NewServer(handlers)
 	err := server.Run(cfg.ServerPort)
 	if err != nil {
 		panic(err)

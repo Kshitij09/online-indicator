@@ -1,38 +1,19 @@
 package transport
 
 import (
-	"context"
 	"fmt"
 	"github.com/Kshitij09/online-indicator/di"
-	"github.com/Kshitij09/online-indicator/domain"
-	"github.com/Kshitij09/online-indicator/redisstore"
 	"github.com/Kshitij09/online-indicator/transport/middlewares"
-	"github.com/jonboulle/clockwork"
-	"github.com/redis/go-redis/v9"
 	"log"
 	"net/http"
 )
 
 type Server struct {
-	domain.Storage
-	config      domain.Config
-	clock       clockwork.Clock
-	lastSeenDao domain.LastSeenDao
-	db          di.DatabaseContainer
-	svcs        di.ServiceContainer
-	handlers    di.HandlerContainer
+	handlers di.HandlerContainer
 }
 
-func NewServer(storage domain.Storage, config domain.Config, clock clockwork.Clock, client *redis.Client, db di.DatabaseContainer, svcs di.ServiceContainer, handlers di.HandlerContainer) *Server {
-	return &Server{
-		Storage:     storage,
-		config:      config,
-		clock:       clock,
-		lastSeenDao: redisstore.LastSeenDao(client, context.Background(), config.OnlineThreshold),
-		db:          db,
-		svcs:        svcs,
-		handlers:    handlers,
-	}
+func NewServer(handlers di.HandlerContainer) Server {
+	return Server{handlers}
 }
 func (s *Server) Run(port int) error {
 	listAddr := fmt.Sprintf(":%d", port)
