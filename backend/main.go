@@ -45,7 +45,14 @@ func main() {
 		Auth:   service.NewAuthService(db.Auth, db.Session, db.Profile),
 		Ping:   service.NewPingService(db.Session, db.LastSeen),
 	}
-	server := transport.NewServer(storage, cfg, realClock, redisClient, db, services)
+	handlers := di.HandlerContainer{
+		Register:    transport.RegisterHandler(storage),
+		Login:       transport.LoginHandler(storage),
+		Ping:        transport.PingHandler(storage, db.LastSeen),
+		Status:      transport.StatusHandler(storage, cfg, realClock, db.LastSeen),
+		BatchStatus: transport.BatchStatusHandler(storage, cfg, realClock, db.LastSeen),
+	}
+	server := transport.NewServer(storage, cfg, realClock, redisClient, db, services, handlers)
 	err := server.Run(cfg.ServerPort)
 	if err != nil {
 		panic(err)
