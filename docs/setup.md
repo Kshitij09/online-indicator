@@ -1,10 +1,11 @@
 # Docker Setup and Running Instructions
 
-This project is containerized using Docker and Docker Compose. The stack consists of three components:
+This project is containerized using Docker and Docker Compose. The stack consists of four components:
 
 1. **Backend**: A Go REST API server that binds to port 8080
 2. **Pulsesim**: A Go client that simulates online activity for 100 users
 3. **Dashboard**: A Vite + Svelte webapp that shows online status for the first 100 users
+4. **Redis**: Used as an in-memory KV store for the userId to lastSeen mapping
 
 ## Prerequisites
 
