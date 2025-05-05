@@ -1,9 +1,13 @@
 package main
 
 import (
+	"context"
 	"flag"
+	"github.com/Kshitij09/online-indicator/di"
 	"github.com/Kshitij09/online-indicator/domain"
+	"github.com/Kshitij09/online-indicator/domain/service"
 	"github.com/Kshitij09/online-indicator/inmem"
+	"github.com/Kshitij09/online-indicator/redisstore"
 	"github.com/Kshitij09/online-indicator/transport"
 	"github.com/jonboulle/clockwork"
 	"github.com/redis/go-redis/v9"
@@ -30,7 +34,18 @@ func main() {
 		DB:       0,  // Use default DB
 		Protocol: 2,  // Connection protocol
 	})
-	server := transport.NewServer(storage, cfg, realClock, redisClient)
+	db := di.DatabaseContainer{
+		Auth:     inmem.NewAuthDao(apiKeyGen, idGen),
+		Session:  inmem.NewSessionCache(sessionGen, realClock),
+		Profile:  inmem.NewProfileCache(),
+		LastSeen: redisstore.LastSeenDao(redisClient, context.Background(), cfg.OnlineThreshold),
+	}
+	services := di.ServiceContainer{
+		Status: service.NewStatusService(db.Session, cfg.OnlineThreshold, db.Profile, db.LastSeen, realClock),
+		Auth:   service.NewAuthService(db.Auth, db.Session, db.Profile),
+		Ping:   service.NewPingService(db.Session, db.LastSeen),
+	}
+	server := transport.NewServer(storage, cfg, realClock, redisClient, db, services)
 	err := server.Run(cfg.ServerPort)
 	if err != nil {
 		panic(err)

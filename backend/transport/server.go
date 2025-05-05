@@ -3,6 +3,7 @@ package transport
 import (
 	"context"
 	"fmt"
+	"github.com/Kshitij09/online-indicator/di"
 	"github.com/Kshitij09/online-indicator/domain"
 	"github.com/Kshitij09/online-indicator/redisstore"
 	"github.com/Kshitij09/online-indicator/transport/middlewares"
@@ -17,14 +18,18 @@ type Server struct {
 	config      domain.Config
 	clock       clockwork.Clock
 	lastSeenDao domain.LastSeenDao
+	db          di.DatabaseContainer
+	svcs        di.ServiceContainer
 }
 
-func NewServer(storage domain.Storage, config domain.Config, clock clockwork.Clock, client *redis.Client) *Server {
+func NewServer(storage domain.Storage, config domain.Config, clock clockwork.Clock, client *redis.Client, db di.DatabaseContainer, svcs di.ServiceContainer) *Server {
 	return &Server{
 		Storage:     storage,
 		config:      config,
 		clock:       clock,
 		lastSeenDao: redisstore.LastSeenDao(client, context.Background(), config.OnlineThreshold),
+		db:          db,
+		svcs:        svcs,
 	}
 }
 func (s *Server) Run(port int) error {
