@@ -6,7 +6,6 @@ import (
 	"github.com/Kshitij09/online-indicator/domain/service"
 	"github.com/Kshitij09/online-indicator/domain/stubs"
 	"github.com/Kshitij09/online-indicator/inmem"
-	"github.com/Kshitij09/online-indicator/testfixtures"
 	"github.com/Kshitij09/online-indicator/transport/apierror"
 	"github.com/jonboulle/clockwork"
 	"net/http"
@@ -19,7 +18,7 @@ func TestPingHandler_Unauthorized(t *testing.T) {
 	staticGen := stubs.StaticGenerator{StubValue: "expected_token"}
 	storage := inmem.NewStorage(staticGen, staticGen, clock, staticGen)
 	lastSeen := stubs.StubLastSeenDao{}
-	handler := NewHttpHandler(PingHandler(storage, testfixtures.Config, clock, lastSeen))
+	handler := NewHttpHandler(PingHandler(storage, lastSeen))
 	t.Run("session token not found", func(t *testing.T) {
 		recorder := httptest.NewRecorder()
 		req := createPingRequest("random", "non_existent_token")
@@ -45,7 +44,7 @@ func TestPingHandler_Unauthorized(t *testing.T) {
 			t.Error(err)
 		}
 
-		handler := NewHttpHandler(PingHandler(storage, testfixtures.Config, clock, lastSeen))
+		handler := NewHttpHandler(PingHandler(storage, lastSeen))
 		recorder := httptest.NewRecorder()
 
 		// with valid account id and invalid session token
@@ -70,7 +69,7 @@ func TestPingHandler_BadRequest(t *testing.T) {
 	staticGen := stubs.StaticGenerator{}
 	storage := inmem.NewStorage(staticGen, staticGen, clock, staticGen)
 	lastSeen := stubs.StubLastSeenDao{}
-	handler := NewHttpHandler(PingHandler(storage, testfixtures.Config, clock, lastSeen))
+	handler := NewHttpHandler(PingHandler(storage, lastSeen))
 
 	recorder := httptest.NewRecorder()
 
@@ -107,7 +106,7 @@ func TestPingHandler_OK(t *testing.T) {
 		t.Error(err)
 	}
 
-	handler := NewHttpHandler(PingHandler(storage, testfixtures.Config, clock, lastSeen))
+	handler := NewHttpHandler(PingHandler(storage, lastSeen))
 	recorder := httptest.NewRecorder()
 
 	req := createPingRequest(session.AccountId, session.Token)

@@ -32,14 +32,8 @@ func TestStatusHandler_Success(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	statusService := service.NewStatusService(
-		storage.Session(),
-		testfixtures.Config.OnlineThreshold,
-		storage.Profile(),
-		lastSeen,
-		clock,
-	)
-	err = statusService.Ping(session.AccountId, session.Token)
+	pingService := service.NewPingService(storage.Session(), lastSeen)
+	err = pingService.Ping(session.AccountId, session.Token)
 	if err != nil {
 		t.Error(err)
 	}
@@ -181,14 +175,8 @@ func TestBatchStatusHandler_Success(t *testing.T) {
 		if err != nil {
 			t.Error(err)
 		}
-		statusService := service.NewStatusService(
-			storage.Session(),
-			testfixtures.Config.OnlineThreshold,
-			storage.Profile(),
-			lastSeen,
-			clock,
-		)
-		err = statusService.Ping(session.AccountId, session.Token)
+		pingService := service.NewPingService(storage.Session(), lastSeen)
+		err = pingService.Ping(session.AccountId, session.Token)
 		if err != nil {
 			t.Error(err)
 		}
@@ -252,14 +240,8 @@ func TestStatusHandler_OnlineToOfflineAfterThreshold(t *testing.T) {
 	}
 
 	// Ping to set online
-	statusService := service.NewStatusService(
-		storage.Session(),
-		testfixtures.Config.OnlineThreshold,
-		storage.Profile(),
-		lastSeen,
-		clock,
-	)
-	err = statusService.Ping(session.AccountId, session.Token)
+	pingService := service.NewPingService(storage.Session(), lastSeen)
+	err = pingService.Ping(session.AccountId, session.Token)
 	if err != nil {
 		t.Error(err)
 	}
@@ -353,14 +335,8 @@ func TestStatusHandler_OfflineToOnline(t *testing.T) {
 	}
 
 	// Ping to set online
-	statusService := service.NewStatusService(
-		storage.Session(),
-		testfixtures.Config.OnlineThreshold,
-		storage.Profile(),
-		lastSeen,
-		clock,
-	)
-	err = statusService.Ping(session.AccountId, session.Token)
+	pingService := service.NewPingService(storage.Session(), lastSeen)
+	err = pingService.Ping(session.AccountId, session.Token)
 	if err != nil {
 		t.Error(err)
 	}
