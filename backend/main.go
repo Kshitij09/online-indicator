@@ -35,8 +35,8 @@ func main() {
 	})
 	db := di.DatabaseContainer{
 		Auth:     inmem.NewAuthDao(apiKeyGen, idGen),
-		Session:  inmem.NewSessionCache(sessionGen, realClock),
-		Profile:  inmem.NewProfileCache(),
+		Session:  inmem.NewSessionDao(sessionGen, realClock),
+		Profile:  inmem.NewProfileDao(),
 		LastSeen: redisstore.LastSeenDao(redisClient, context.Background(), cfg.OnlineThreshold),
 	}
 	svcs := di.ServiceContainer{
